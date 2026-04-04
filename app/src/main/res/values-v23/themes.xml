@@ -1,0 +1,18 @@
+<resources>
+    <style name="Theme.AzokleAuth.Light" parent="Base.Theme.AzokleAuth.Light">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.AzokleAuth.Dark" parent="Base.Theme.AzokleAuth.Dark">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.AzokleAuth.Amoled" parent="Base.Theme.AzokleAuth.Amoled">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
