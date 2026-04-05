@@ -89,8 +89,8 @@
     <string name="pref_export_title">Export</string>
     <string name="pref_export_summary">Export the vault</string>
     <string name="pref_password_reminder_title">Password reminder</string>
-    <string name="pref_google_auth_export_title">Export for Google Authenticator</string>
-    <string name="pref_google_auth_export_descriptor">Generates export QR codes compatible with Google Authenticator</string>
+    <string name="pref_google_auth_export_title" tools:ignore="UnusedResources">Export for Google Authenticator</string>
+    <string name="pref_google_auth_export_descriptor" tools:ignore="UnusedResources">Generates export QR codes compatible with Google Authenticator</string>
     <string name="pref_other_auth_export_title">Export for Other Authenticator</string>
     <string name="pref_other_auth_export_descriptor">Generates export QR codes compatible with Other Authenticator</string>
 
@@ -428,9 +428,9 @@
     <string name="license_description">Azokle Authenticator is licensed under GPLv3</string>
     <string name="third_party_licenses">Third-party licenses</string>
     <string name="third_party_licenses_description">Licenses of the third-party libraries Azokle Auth uses</string>
-    <string name="author_azokle" translatable="false">Azokle Private Limited</string>
-    <string name="country_netherlands">India</string>
-    <string name="author_michael" translatable="false">Azokle Private Limited</string>
+    <string name="author_azokle" translatable="false" tools:ignore="UnusedResources">Azokle Private Limited</string>
+    <string name="country_netherlands" tools:ignore="UnusedResources">India</string>
+    <string name="author_michael" translatable="false" tools:ignore="UnusedResources">Azokle Private Limited</string>
     <string name="email_us">Write an email</string>
     <string name="visit_website">Visit our website</string>
     <string name="about_support">Support</string>
