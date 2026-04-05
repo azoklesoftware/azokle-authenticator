@@ -58,7 +58,7 @@ public class DatabaseImporterTest {
 
     @Test
     public void testImportAzokleAuthPlain() throws IOException, DatabaseImporterException, OtpInfoException {
-        List<VaultEntry> entries = importPlain(AzokleAuthImporter.class, "azokleauth_plain.json");
+        List<VaultEntry> entries = importPlain(AzokleAuthImporter.class, "azokle_auth_plain.json");
         checkImportedEntries(entries);
     }
 
