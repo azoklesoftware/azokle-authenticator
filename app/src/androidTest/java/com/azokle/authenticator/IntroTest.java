@@ -138,7 +138,7 @@ public class IntroTest extends AzokleAuthTest {
     @Test
     public void testIntro_Import_Plain() {
         assertFalse(_prefs.isIntroDone());
-        Uri uri = getResourceUri("azokleauth_plain.json");
+        Uri uri = getResourceUri("azokle_auth_plain.json");
         Intent resultData = new Intent();
         resultData.setData(uri);
 
