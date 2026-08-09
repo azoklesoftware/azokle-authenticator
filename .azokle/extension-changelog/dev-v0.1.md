@@ -8,7 +8,7 @@
 
 ## 🚀 Summary of Key Innovations & Architecture
 
-This release establishes full feature, algorithm, and vault compatibility between the **Azokle Auth Browser Extension** and the **Azokle Auth Android** application.
+This release establishes 1-to-1 feature, algorithm, settings, and vault compatibility between the **Azokle Auth Browser Extension** and the **Azokle Auth Android** application.
 
 ---
 
@@ -30,6 +30,9 @@ This release establishes full feature, algorithm, and vault compatibility betwee
   - Re-encrypt updated vault entries with session master key and fresh 12-byte random AES-GCM nonces.
   - Generates valid `.azokle` JSON backup files compatible with the native Android app.
 
+- **Standalone HTML Exporter (`vault/html-exporter.js`):**
+  - Direct port of `VaultHtmlExporter.java` generating styled standalone HTML backups containing full entry data.
+
 ---
 
 ## ⚡ 2. Complete 5-OTP Algorithm Engine (`src/otp/`)
@@ -42,7 +45,42 @@ This release establishes full feature, algorithm, and vault compatibility betwee
 
 ---
 
-## 🌐 3. Multi-Format Importers Engine (`src/importers/`)
+## ⚙️ 3. Preferences Engine & Customization (`src/prefs/`)
+
+- **31-Preference Settings Engine (`prefs/index.js`):**
+  - Fully mapped settings system matching Android `Preferences.java`.
+  - Persisted in `chrome.storage.local`.
+
+- **5 Code Groupings (`otp/formatter.js`):**
+  - `GROUPING_THREES` (`123 456`), `GROUPING_TWOS` (`12 34 56`), `GROUPING_FOURS` (`1234 5678`), `HALVES` (midpoint split), `NO_GROUPING`.
+
+- **4 View Modes (`popup/style.css`):**
+  - `NORMAL` (default rich card), `COMPACT` (narrow rows), `SMALL` (minimalist text), `TILES` (2-column responsive grid).
+
+- **7-Way Sort Categories (`ui/sort.js`):**
+  - `ISSUER` (A-Z), `ISSUER_REVERSED` (Z-A), `ACCOUNT` (A-Z), `ACCOUNT_REVERSED` (Z-A), `USAGE_COUNT`, `LAST_USED`, `CUSTOM` (drag order).
+  - Favorites (⭐) always pinned to top.
+
+- **Bitmasked Search (`ui/search.js`):**
+  - Bitmask filtering across `ISSUER` (0x01), `NAME` (0x02), `NOTE` (0x04), and `GROUPS` (0x08).
+
+- **Show Next Code Preview:**
+  - Calculates and renders `code(t + period)` preview for TOTP tokens.
+
+---
+
+## 🛡️ 4. Security Audit Log System (`src/audit/`)
+
+- **Room-Equivalent Audit Logger (`audit/index.js`):**
+  - Logs security events: `VAULT_UNLOCKED`, `VAULT_EXPORTED`, `ENTRY_SHARED`, `VAULT_UNLOCK_FAILED_PASSWORD`, etc.
+  - Dedicated interactive Audit Log modal view.
+
+- **Memory Hygiene:**
+  - Automatically zero-fills `masterKey` Uint8Array memory bytes upon vault lock.
+
+---
+
+## 🌐 5. Multi-Format Importers Engine (`src/importers/`)
 
 Auto-detects and converts third-party 2FA backups directly into Azokle Auth entries:
 - **Bitwarden Importer (`importers/bitwarden.js`):** JSON vault items & CSV exports (`login_totp`).
@@ -51,30 +89,19 @@ Auto-detects and converts third-party 2FA backups directly into Azokle Auth entr
 
 ---
 
-## 🎯 4. Smart Browser Features
+## 🎯 6. Smart Browser Features & UI
 
 - **Context-Aware Active Tab Domain Matching (`ui/domain-matcher.js`):**
   - Uses `activeTab` permission to query current window URL (e.g. `github.com`).
-  - Matches active tab domain against entry issuers/names and renders a **"MATCHED FOR ACTIVE TAB"** suggested token banner at the top of the popup.
+  - Matches active tab domain against entry issuers/names and renders a **"MATCHED FOR ACTIVE TAB"** suggested token banner at top.
 
----
-
-## 🎨 5. Glassmorphism Design System & Accessibility
-
-- **Modern Visual Styling (`popup/style.css`):**
+- **Modern Glassmorphism UI:**
   - Deep slate dark mode (`#0F172A`) with blurred translucent glass surfaces.
-  - Typography powered by **Outfit** and **Fira Code** Google Fonts for maximum code legibility.
-- **Dynamic SVG Progress Rings:**
-  - Per-card animated circular SVG timer ring displaying remaining time (Color urgency: Sky Blue → Warning Orange → Danger Red).
-- **Accessibility & Security:**
-  - Full keyboard focus management (`tabindex="0"`, `Enter` key copy trigger).
-  - ARIA live region annotations.
-  - Disabled `autocomplete` and `spellcheck` on password inputs.
-  - In-memory master key auto-purge after 5 minutes of inactivity (`background.js`).
+  - Animated SVG circular progress rings (Color urgency: Sky Blue → Warning Orange → Danger Red).
 
 ---
 
 ## 📊 Build Verification
-- **Production Output:** `dist/chromium` (98.8 KB)
-- **Compile Time:** 324 ms
+- **Production Output:** `dist/chromium` (110.9 KB)
+- **Compile Time:** 558 ms
 - **Network Requests:** 0 (100% Offline)
