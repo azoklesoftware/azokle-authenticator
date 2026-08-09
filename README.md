@@ -111,6 +111,16 @@ Azokle Auth uses a **slot-based key wrapping system** (similar to LUKS):
 
 ---
 
+## 🤝 Community & Governance
+
+We welcome contributions! Please review our community guidelines before participating:
+
+- 📜 **[Code of Conduct](CODE_OF_CONDUCT.md):** Our pledge for a welcoming and inclusive community (Contributor Covenant v2.1).
+- 🛠️ **[Contributing Guidelines](CONTRIBUTING.md):** Guidelines for reporting bugs, proposing features, and submitting pull requests.
+- 🔒 **[Security Policy](SECURITY.md):** Information on reporting security vulnerabilities and our zero-trust architecture.
+
+---
+
 ## 📄 License
 
 Azokle Auth is open-source software licensed under the **GNU General Public License v3.0**.  
