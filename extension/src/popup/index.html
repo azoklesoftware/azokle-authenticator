@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azokle Auth</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="brand">
+                <img src="../images/icon.png" alt="Logo" class="logo" width="28" height="28">
+                <h1>Azokle Auth</h1>
+            </div>
+            <div class="header-actions">
+                <button id="add-btn" class="icon-btn hidden" aria-label="Add Entry" title="Add TOTP Entry">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+                <button id="export-btn" class="icon-btn hidden" aria-label="Export Vault" title="Export .azokle File">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </button>
+                <button id="lock-btn" class="icon-btn hidden" aria-label="Lock Vault" title="Lock Vault">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- View: Unlock / Import -->
+        <main id="view-unlock" class="view active" aria-live="polite">
+            <div id="setup-section" class="setup-card hidden">
+                <h2>Welcome to Azokle Auth</h2>
+                <p>Import your vault from Azokle Auth (Android), Bitwarden, or 2FAS.</p>
+                <div class="input-group">
+                    <input type="file" id="vault-file" accept=".azokle,.json,.csv" aria-label="Upload Vault File">
+                </div>
+            </div>
+
+            <div id="unlock-section" class="hidden">
+                <h2>Unlock Vault</h2>
+                <p>Enter your master password to access your authentication codes securely.</p>
+                <div class="input-group">
+                    <input type="password" id="master-password" placeholder="Master Password" aria-label="Master Password" autocomplete="off" spellcheck="false" />
+                </div>
+                <button id="unlock-btn" class="primary-btn">
+                    <span>Unlock</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+                <div id="unlock-error" class="error-text hidden" aria-live="assertive">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span></span>
+                </div>
+            </div>
+        </main>
+
+        <!-- View: Main OTP Vault -->
+        <main id="view-otp" class="view hidden" aria-live="polite">
+            <!-- Suggested Token Card (Active Tab Matching) -->
+            <div id="suggested-section" class="suggested-section hidden">
+                <div class="suggested-label">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <span>MATCHED FOR ACTIVE TAB</span>
+                </div>
+                <div id="suggested-card-container"></div>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="controls-bar">
+                <div class="search-box">
+                    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="search-input" placeholder="Search issuer, account..." aria-label="Search entries">
+                </div>
+                <select id="sort-select" class="sort-select" aria-label="Sort Order">
+                    <option value="issuer">Sort: Issuer</option>
+                    <option value="account">Sort: Account</option>
+                    <option value="usage_count">Sort: Usage</option>
+                    <option value="last_used">Sort: Last Used</option>
+                </select>
+            </div>
+
+            <!-- Group Chips Bar -->
+            <div id="group-chips" class="group-chips">
+                <!-- Group chips dynamically injected -->
+            </div>
+
+            <!-- OTP List Container -->
+            <div id="otp-list" class="otp-list">
+                <!-- Cards dynamically injected -->
+            </div>
+        </main>
+
+        <!-- Modal: Add New Entry -->
+        <div id="add-modal" class="modal hidden">
+            <div class="modal-content glass-card">
+                <h3>Add TOTP Entry</h3>
+                <div class="input-group">
+                    <input type="text" id="add-issuer" placeholder="Service / Issuer (e.g. GitHub)" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="add-account" placeholder="Account / Email (e.g. user@domain)" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="add-secret" placeholder="Secret Key (Base32)" autocomplete="off">
+                </div>
+                <div class="modal-actions">
+                    <button id="add-cancel-btn" class="secondary-btn">Cancel</button>
+                    <button id="add-submit-btn" class="primary-btn">Save Entry</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: PIN Prompt for mOTP / Yandex -->
+        <div id="pin-modal" class="modal hidden">
+            <div class="modal-content glass-card">
+                <h3>Enter PIN</h3>
+                <p id="pin-modal-desc">This entry requires a PIN to generate codes.</p>
+                <input type="password" id="pin-input" placeholder="4-digit PIN" maxlength="16" autocomplete="off">
+                <div class="modal-actions">
+                    <button id="pin-cancel-btn" class="secondary-btn">Cancel</button>
+                    <button id="pin-submit-btn" class="primary-btn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Card Template -->
+    <template id="otp-card-template">
+        <div class="otp-card" role="button" tabindex="0" aria-label="Copy code">
+            <div class="otp-header">
+                <div class="otp-info">
+                    <div class="otp-badge-row">
+                        <span class="otp-issuer"></span>
+                        <span class="favorite-star hidden">⭐</span>
+                    </div>
+                    <span class="otp-account"></span>
+                </div>
+                <div class="otp-ring-wrapper">
+                    <svg class="progress-ring" viewBox="0 0 24 24">
+                        <circle class="progress-ring-circle" cx="12" cy="12" r="10"></circle>
+                        <circle class="progress-ring-value" cx="12" cy="12" r="10" stroke-dasharray="62.831" stroke-dashoffset="0"></circle>
+                    </svg>
+                </div>
+            </div>
+            <div class="otp-code-container">
+                <span class="otp-code"></span>
+            </div>
+        </div>
+    </template>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
