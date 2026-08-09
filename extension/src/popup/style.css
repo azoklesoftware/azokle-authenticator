@@ -53,7 +53,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
+    padding: 12px 16px;
     background: var(--surface-glass);
     border-bottom: 1px solid var(--surface-border);
     backdrop-filter: blur(12px);
@@ -76,7 +76,7 @@ body {
 }
 
 h1 {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.5px;
     background: linear-gradient(135deg, #fff 0%, #94A3B8 100%);
@@ -113,7 +113,7 @@ h1 {
 /* Views */
 .view {
     flex: 1;
-    padding: 14px;
+    padding: 12px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -125,8 +125,8 @@ h1 {
 
 /* Suggested Active Tab Token */
 .suggested-section {
-    margin-bottom: 12px;
-    padding: 10px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
     background: rgba(14, 165, 233, 0.08);
     border: 1px solid rgba(14, 165, 233, 0.3);
     border-radius: var(--radius);
@@ -140,13 +140,13 @@ h1 {
     font-weight: 700;
     letter-spacing: 0.5px;
     color: var(--primary-color);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
-/* Controls Bar (Search & Sort) */
+/* Controls Bar (Search & Sort & ViewMode) */
 .controls-bar {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 10px;
 }
 
@@ -159,19 +159,19 @@ h1 {
 
 .search-icon {
     position: absolute;
-    left: 10px;
+    left: 8px;
     color: var(--text-secondary);
     pointer-events: none;
 }
 
 .search-box input {
     width: 100%;
-    padding: 8px 10px 8px 30px;
+    padding: 6px 8px 6px 26px;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-size: 13px;
+    font-size: 12px;
     font-family: inherit;
     transition: var(--transition);
 }
@@ -183,12 +183,12 @@ h1 {
 }
 
 .sort-select {
-    padding: 8px;
+    padding: 6px 8px;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 11px;
     font-family: inherit;
     cursor: pointer;
 }
@@ -205,7 +205,7 @@ h1 {
     gap: 6px;
     overflow-x: auto;
     padding-bottom: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     scrollbar-width: none;
 }
 
@@ -214,7 +214,7 @@ h1 {
 }
 
 .chip {
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--surface-border);
@@ -238,7 +238,7 @@ h1 {
     box-shadow: 0 2px 8px var(--primary-glow);
 }
 
-/* Forms & Inputs */
+/* Form Inputs & Buttons */
 .input-group {
     margin-bottom: 12px;
 }
@@ -266,7 +266,7 @@ input[type="password"]:focus {
 
 .primary-btn {
     width: 100%;
-    padding: 11px;
+    padding: 10px;
     background: linear-gradient(135deg, var(--primary-color) 0%, #3B82F6 100%);
     color: white;
     border: none;
@@ -289,13 +289,23 @@ input[type="password"]:focus {
 }
 
 .secondary-btn {
-    padding: 9px 14px;
+    padding: 8px 12px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--surface-border);
     color: var(--text-primary);
     border-radius: var(--radius-sm);
     font-size: 12px;
     cursor: pointer;
+    transition: var(--transition);
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.full-width {
+    width: 100%;
+    text-align: center;
 }
 
 /* Setup Card */
@@ -307,15 +317,51 @@ input[type="password"]:focus {
     text-align: center;
 }
 
-/* OTP List */
+/* OTP List & ViewModes */
 .otp-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     flex: 1;
     overflow-y: auto;
 }
 
+/* ViewMode: TILES (2-column Grid) */
+.otp-list.view-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.otp-list.view-tiles .otp-card {
+    padding: 10px;
+}
+
+.otp-list.view-tiles .otp-code {
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+/* ViewMode: COMPACT */
+.otp-list.view-compact .otp-card {
+    padding: 8px 10px;
+}
+
+.otp-list.view-compact .otp-code {
+    font-size: 20px;
+}
+
+/* ViewMode: SMALL */
+.otp-list.view-small .otp-card {
+    padding: 6px 8px;
+}
+
+.otp-list.view-small .otp-code {
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+/* OTP Card Base */
 .otp-card {
     background: var(--surface-glass);
     border: 1px solid var(--surface-border);
@@ -338,7 +384,7 @@ input[type="password"]:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .otp-badge-row {
@@ -348,30 +394,43 @@ input[type="password"]:focus {
 }
 
 .otp-issuer {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
     font-weight: 500;
 }
 
 .favorite-star {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .otp-account {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.otp-code-container {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
 .otp-code {
-    font-size: 26px;
+    font-size: 24px;
     font-family: 'Fira Code', monospace;
     font-weight: 700;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     color: var(--primary-color);
     transition: color 0.2s ease;
+}
+
+.otp-next-code {
+    font-size: 11px;
+    font-family: 'Fira Code', monospace;
+    color: var(--text-secondary);
+    opacity: 0.7;
 }
 
 .otp-card.copied .otp-code {
@@ -385,7 +444,7 @@ input[type="password"]:focus {
     transform: translate(-50%, -50%);
     background: rgba(16, 185, 129, 0.95);
     color: white;
-    padding: 6px 14px;
+    padding: 4px 12px;
     border-radius: var(--radius-sm);
     font-size: 12px;
     font-weight: 600;
@@ -394,8 +453,8 @@ input[type="password"]:focus {
 
 /* Circular Progress */
 .progress-ring {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     transform: rotate(-90deg);
 }
 
@@ -432,13 +491,41 @@ input[type="password"]:focus {
     background: var(--bg-color);
     border: 1px solid var(--surface-border);
     border-radius: var(--radius);
-    padding: 18px;
-    width: 290px;
+    padding: 16px;
+    width: 280px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+.modal-content.wide-modal {
+    width: 320px;
+    max-height: 440px;
+    overflow-y: auto;
+}
+
 .modal-content h3 {
-    font-size: 16px;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.pref-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+.modal-divider {
+    height: 1px;
+    background: var(--surface-border);
+    margin: 12px 0;
+}
+
+.modal-actions-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: 12px;
 }
 
@@ -446,7 +533,34 @@ input[type="password"]:focus {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    margin-top: 14px;
+    margin-top: 10px;
+}
+
+.audit-log-list {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.audit-item {
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+}
+
+.audit-type {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.audit-time {
+    color: var(--text-secondary);
+    font-size: 10px;
+    float: right;
 }
 
 .error-text {

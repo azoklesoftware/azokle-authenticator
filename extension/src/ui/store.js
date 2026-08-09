@@ -1,4 +1,8 @@
 // src/ui/store.js
+import { prefs, defaultPreferences } from '../prefs/index.js';
+import { filterEntriesBySearch } from './search.js';
+import { sortEntries } from './sort.js';
+import { logAuditEvent, EventType } from '../audit/index.js';
 
 class Store {
     constructor() {
@@ -7,17 +11,21 @@ class Store {
             groups: [],
             activeGroupUuid: null,
             searchQuery: '',
-            sortCategory: 'issuer', // 'custom', 'issuer', 'account', 'usage_count', 'last_used'
-            settings: {
-                tapToReveal: false,
-                codeGrouping: 'GROUPING_THREES',
-                autoLockMinutes: 5,
-                minimizeOnCopy: false
-            },
+            preferences: { ...defaultPreferences },
             usageCounts: {},
             lastUsedTimestamps: {}
         };
         this.listeners = new Set();
+    }
+
+    async init() {
+        const loadedPrefs = await prefs.load();
+        const storage = await chrome.storage.local.get(['usageCounts', 'lastUsedTimestamps']);
+        this.setState({
+            preferences: loadedPrefs,
+            usageCounts: storage.usageCounts || {},
+            lastUsedTimestamps: storage.lastUsedTimestamps || {}
+        });
     }
 
     getState() {
@@ -40,10 +48,17 @@ class Store {
         this.notify();
     }
 
+    async updatePreference(key, value) {
+        await prefs.set(key, value);
+        const updated = prefs.getAll();
+        this.setState({ preferences: updated });
+    }
+
     setVault(content) {
         const entries = content.entries || [];
         const groups = content.groups || [];
         this.setState({ entries, groups });
+        logAuditEvent(EventType.VAULT_UNLOCKED);
     }
 
     setActiveGroup(groupUuid) {
@@ -52,10 +67,6 @@ class Store {
 
     setSearchQuery(query) {
         this.setState({ searchQuery: query });
-    }
-
-    setSortCategory(category) {
-        this.setState({ sortCategory: category });
     }
 
     incrementUsage(entryUuid) {
@@ -70,7 +81,6 @@ class Store {
             lastUsedTimestamps: timestamps
         });
 
-        // Persist locally
         chrome.storage.local.set({
             usageCounts: counts,
             lastUsedTimestamps: timestamps
@@ -78,52 +88,20 @@ class Store {
     }
 
     getFilteredAndSortedEntries() {
-        let { entries, activeGroupUuid, searchQuery, sortCategory, usageCounts, lastUsedTimestamps } = this.state;
+        let { entries, groups, activeGroupUuid, searchQuery, preferences, usageCounts, lastUsedTimestamps } = this.state;
         
-        // 1. Group filtering
+        // 1. Group filter
         if (activeGroupUuid) {
             entries = entries.filter(e => e.groups && e.groups.includes(activeGroupUuid));
         }
 
-        // 2. Search filtering (Issuer, Name, Note)
+        // 2. Bitmasked Search filter
         if (searchQuery.trim()) {
-            const q = searchQuery.toLowerCase().trim();
-            entries = entries.filter(e => {
-                const name = (e.name || '').toLowerCase();
-                const issuer = (e.issuer || '').toLowerCase();
-                const note = (e.note || '').toLowerCase();
-                return name.includes(q) || issuer.includes(q) || note.includes(q);
-            });
+            entries = filterEntriesBySearch(entries, searchQuery, preferences.pref_search_behavior_mask, groups);
         }
 
-        // 3. Sorting
-        const sorted = [...entries];
-        
-        // Favorites always stay on top
-        sorted.sort((a, b) => {
-            if (a.favorite && !b.favorite) return -1;
-            if (!a.favorite && b.favorite) return 1;
-
-            switch (sortCategory) {
-                case 'account':
-                    return (a.name || '').localeCompare(b.name || '');
-                case 'usage_count': {
-                    const countA = usageCounts[a.uuid] || 0;
-                    const countB = usageCounts[b.uuid] || 0;
-                    return countB - countA;
-                }
-                case 'last_used': {
-                    const timeA = lastUsedTimestamps[a.uuid] || 0;
-                    const timeB = lastUsedTimestamps[b.uuid] || 0;
-                    return timeB - timeA;
-                }
-                case 'issuer':
-                default:
-                    return (a.issuer || a.name || '').localeCompare(b.issuer || b.name || '');
-            }
-        });
-
-        return sorted;
+        // 3. 7-Way Sort
+        return sortEntries(entries, preferences.pref_current_sort_category, usageCounts, lastUsedTimestamps);
     }
 }
 

@@ -18,8 +18,8 @@
                 <button id="add-btn" class="icon-btn hidden" aria-label="Add Entry" title="Add TOTP Entry">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
-                <button id="export-btn" class="icon-btn hidden" aria-label="Export Vault" title="Export .azokle File">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <button id="settings-btn" class="icon-btn hidden" aria-label="Settings" title="Preferences & Audit Logs">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 </button>
                 <button id="lock-btn" class="icon-btn hidden" aria-label="Lock Vault" title="Lock Vault">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -72,10 +72,19 @@
                     <input type="text" id="search-input" placeholder="Search issuer, account..." aria-label="Search entries">
                 </div>
                 <select id="sort-select" class="sort-select" aria-label="Sort Order">
-                    <option value="issuer">Sort: Issuer</option>
-                    <option value="account">Sort: Account</option>
-                    <option value="usage_count">Sort: Usage</option>
-                    <option value="last_used">Sort: Last Used</option>
+                    <option value="ISSUER">Sort: Issuer (A-Z)</option>
+                    <option value="ISSUER_REVERSED">Sort: Issuer (Z-A)</option>
+                    <option value="ACCOUNT">Sort: Account (A-Z)</option>
+                    <option value="ACCOUNT_REVERSED">Sort: Account (Z-A)</option>
+                    <option value="USAGE_COUNT">Sort: Usage Count</option>
+                    <option value="LAST_USED">Sort: Last Used</option>
+                    <option value="CUSTOM">Sort: Custom</option>
+                </select>
+                <select id="view-mode-select" class="sort-select" aria-label="View Mode">
+                    <option value="NORMAL">Normal</option>
+                    <option value="COMPACT">Compact</option>
+                    <option value="SMALL">Small</option>
+                    <option value="TILES">Tiles (Grid)</option>
                 </select>
             </div>
 
@@ -85,10 +94,77 @@
             </div>
 
             <!-- OTP List Container -->
-            <div id="otp-list" class="otp-list">
+            <div id="otp-list" class="otp-list view-normal">
                 <!-- Cards dynamically injected -->
             </div>
         </main>
+
+        <!-- Modal: Settings Panel -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content glass-card wide-modal">
+                <h3>Preferences & Tools</h3>
+                
+                <div class="pref-row">
+                    <label for="pref-tap-reveal">Tap-to-Reveal Codes</label>
+                    <input type="checkbox" id="pref-tap-reveal">
+                </div>
+
+                <div class="pref-row">
+                    <label for="pref-show-next">Show Next Code Preview</label>
+                    <input type="checkbox" id="pref-show-next">
+                </div>
+
+                <div class="pref-row">
+                    <label for="pref-minimize-copy">Minimize on Copy</label>
+                    <input type="checkbox" id="pref-minimize-copy">
+                </div>
+
+                <div class="pref-row">
+                    <label for="pref-code-grouping">Digit Grouping</label>
+                    <select id="pref-code-grouping" class="sort-select">
+                        <option value="GROUPING_THREES">123 456 (Threes)</option>
+                        <option value="GROUPING_TWOS">12 34 56 (Twos)</option>
+                        <option value="GROUPING_FOURS">1234 5678 (Fours)</option>
+                        <option value="HALVES">Midpoint Split</option>
+                        <option value="NO_GROUPING">No Spaces</option>
+                    </select>
+                </div>
+
+                <div class="pref-row">
+                    <label for="pref-copy-behavior">Copy Behavior</label>
+                    <select id="pref-copy-behavior" class="sort-select">
+                        <option value="SINGLETAP">Single Tap</option>
+                        <option value="DOUBLETAP">Double Tap</option>
+                        <option value="NEVER">Disabled</option>
+                    </select>
+                </div>
+
+                <div class="modal-divider"></div>
+
+                <div class="modal-actions-column">
+                    <button id="export-azokle-btn" class="secondary-btn full-width">Export Encrypted (.azokle)</button>
+                    <button id="export-html-btn" class="secondary-btn full-width">Export HTML (with QR codes)</button>
+                    <button id="view-audit-btn" class="secondary-btn full-width">View Security Audit Log</button>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="settings-close-btn" class="primary-btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Audit Log -->
+        <div id="audit-modal" class="modal hidden">
+            <div class="modal-content glass-card wide-modal">
+                <h3>Security Audit Log</h3>
+                <div id="audit-log-list" class="audit-log-list">
+                    <!-- Audit logs injected -->
+                </div>
+                <div class="modal-actions">
+                    <button id="audit-close-btn" class="primary-btn">Close</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal: Add New Entry -->
         <div id="add-modal" class="modal hidden">
@@ -144,6 +220,7 @@
             </div>
             <div class="otp-code-container">
                 <span class="otp-code"></span>
+                <span class="otp-next-code hidden"></span>
             </div>
         </div>
     </template>
