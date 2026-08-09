@@ -51,11 +51,19 @@
     padding: 0;
 }
 
+html {
+    width: 380px;
+    height: 560px;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-deep);
+}
+
 body {
-    min-width: 360px;
-    max-width: 400px;
-    min-height: 540px;
-    max-height: 600px;
+    width: 380px;
+    height: 560px;
+    margin: 0;
+    padding: 0;
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-deep);
     background-image: 
@@ -88,7 +96,8 @@ body {
 .container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     backdrop-filter: blur(16px);
 }
 
@@ -102,6 +111,7 @@ body {
     border-bottom: 1px solid var(--glass-border);
     backdrop-filter: blur(12px);
     z-index: 20;
+    width: 100%;
 }
 
 .brand {
@@ -162,6 +172,56 @@ h1 {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    width: 100%;
+}
+
+#view-unlock {
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.setup-card, #unlock-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 24px 20px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+}
+
+#unlock-section h2, .setup-card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.input-group {
+    margin-bottom: 14px;
+    width: 100%;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    transition: var(--duration-fast) var(--ease-out);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .hidden {
