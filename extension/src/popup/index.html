@@ -222,6 +222,7 @@
             <div class="otp-header">
                 <div class="otp-info">
                     <div class="otp-badge-row">
+                        <div class="otp-avatar-icon"></div>
                         <span class="type-badge">TOTP</span>
                         <span class="otp-issuer"></span>
                         <span class="favorite-star hidden">⭐</span>
@@ -236,12 +237,30 @@
                     <span class="ring-seconds">30</span>
                 </div>
             </div>
+            <div class="otp-copied-overlay hidden">✓ Copied!</div>
             <div class="otp-code-container">
                 <span class="otp-code"></span>
                 <span class="otp-next-code hidden"></span>
             </div>
         </div>
     </template>
+
+    <!-- Group Manager Modal -->
+    <div id="group-modal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Manage Groups</h3>
+                <button id="group-close-btn" class="icon-btn" aria-label="Close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; gap:8px; margin-bottom:12px;">
+                    <input type="text" id="new-group-name" class="glass-input" placeholder="New Group Name" style="flex:1;">
+                    <button id="add-group-btn" class="glass-btn primary-btn">+ Add</button>
+                </div>
+                <div id="group-manager-list" class="group-manager-list"></div>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="script.js"></script>
 </body>

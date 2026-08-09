@@ -488,6 +488,68 @@ input[type="password"]:focus {
     gap: 6px;
 }
 
+.otp-avatar-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.otp-code.expiring {
+    color: #FF5252 !important;
+    animation: otp-expiring-blink 0.5s infinite alternate;
+}
+
+@keyframes otp-expiring-blink {
+    from { opacity: 1; }
+    to   { opacity: 0.4; }
+}
+
+.otp-copied-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--primary-glow);
+    font-size: 14px;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    animation: overlay-fade-in 0.2s var(--ease-out);
+}
+
+@keyframes overlay-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.group-manager-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+}
+
 .type-badge {
     font-size: 9px;
     font-weight: 700;

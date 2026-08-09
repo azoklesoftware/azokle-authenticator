@@ -1,32 +1,123 @@
-# Node & Extension Dependencies / Builds
-node_modules/
-dist/
-extension/dist/
-extension/.extension-js/
-extension/.extension-create.json
-*.log
-.env
-.env.local
+# ==============================================================================
+# AZOKLE AUTH - AIRTIGHT MONOREPO GITIGNORE CONFIGURATION
+# Guaranteed zero build, cache, dependencies, or dev artifacts pushed to GitHub
+# ==============================================================================
 
-# Android Application & Gradle Build Files
+# ------------------------------------------------------------------------------
+# JavaScript / Node / Bun / Next.js / Vite / Extension Artifacts
+# ------------------------------------------------------------------------------
+node_modules/
+**/node_modules/
+
+.next/
+**/.next/
+
+dist/
+**/dist/
+
+.extension-js/
+**/.extension-js/
+.extension-create.json
+**/.extension-create.json
+
+.output/
+**/.output/
+.turbo/
+**/.turbo/
+.cache/
+**/.cache/
+.parcel-cache/
+**/.parcel-cache/
+
+coverage/
+**/coverage/
+.nyc_output/
+**/.nyc_output/
+
+# Logs & Environment Configuration
+*.log
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun.log
+.env
+.env.*
+!.env.example
+
+# ------------------------------------------------------------------------------
+# Rust / Cargo Backend Build Files
+# ------------------------------------------------------------------------------
+target/
+**/target/
+**/*.rs.bk
+Cargo.lock
+
+# ------------------------------------------------------------------------------
+# Android Application & Gradle Build Artifacts
+# ------------------------------------------------------------------------------
 *.apk
+**/*.apk
 *.ap_
+**/*.ap_
+*.aab
+**/*.aab
 *.dex
+**/*.dex
 *.class
-android/.gradle/
-android/build/
-android/app/build/
-android/local.properties
-android/captures/
-android/.navigation/
-android/proguard/
+**/*.class
+
+.gradle/
+**/.gradle/
+build/
+**/build/
+release/
+**/release/
+
+local.properties
+**/local.properties
+captures/
+**/captures/
+.navigation/
+**/.navigation/
+proguard/
+**/proguard/
 *.jks
+**/*.jks
 crowdin.properties
 .crowdin/config.yml
 
-# IDE & Editor Files
-*.iml
+# ------------------------------------------------------------------------------
+# IDEs, Operating Systems & Editors
+# ------------------------------------------------------------------------------
 .idea/
+**/.idea/
 .vscode/
+**/.vscode/
+*.iml
+**/*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
 .DS_Store
+**/.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+**/Thumbs.db
+
+# Temporary & Swap Files
+*.swp
+**/*.swp
+*.swo
+**/*.swo
+*~
+**/*~
+*.tmp
+**/*.tmp

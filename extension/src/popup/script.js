@@ -404,6 +404,9 @@ function renderOtps() {
     updateProgressRings();
 }
 
+import { generateLetterAvatar } from '../ui/avatars.js';
+import { getBrandIconSvg } from '../icons/index.js';
+
 function createOtpCard(entry, preferences) {
     const clone = ui.template.content.cloneNode(true);
     const card = clone.querySelector('.otp-card');
@@ -413,11 +416,24 @@ function createOtpCard(entry, preferences) {
     const nextCodeNode = clone.querySelector('.otp-next-code');
     const starNode = clone.querySelector('.favorite-star');
     const typeBadge = clone.querySelector('.type-badge');
+    const iconContainer = clone.querySelector('.otp-avatar-icon');
 
     card.dataset.type = entry.type || 'totp';
     typeBadge.textContent = (entry.type || 'totp').toUpperCase();
     issuerNode.textContent = entry.issuer || 'Unknown';
     accountNode.textContent = entry.name || 'Account';
+
+    if (iconContainer) {
+        const brandSvg = getBrandIconSvg(entry.issuer || entry.name);
+        if (brandSvg) {
+            iconContainer.innerHTML = brandSvg;
+            iconContainer.style.background = 'rgba(255, 255, 255, 0.08)';
+        } else {
+            const { letter, color } = generateLetterAvatar(entry.issuer || entry.name);
+            iconContainer.textContent = letter;
+            iconContainer.style.background = color;
+        }
+    }
     
     if (entry.favorite) starNode.classList.remove('hidden');
 
@@ -447,8 +463,23 @@ function createOtpCard(entry, preferences) {
         codeNode.textContent = 'RE-PIN';
     });
 
+    const overlay = clone.querySelector('.otp-copied-overlay');
     const copyBehavior = preferences.pref_current_copy_behavior || 'SINGLETAP';
     let clickTimeout = null;
+
+    const executeCopy = async () => {
+        const rawCode = await generateCode(entry);
+        await navigator.clipboard.writeText(rawCode);
+        logAuditEvent(EventType.ENTRY_COPIED, `Copied code for ${entry.issuer || entry.name}`);
+        showToast(`Copied ${entry.issuer || entry.name}!`);
+        if (overlay) {
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.add('hidden'), 2000);
+        }
+        if (preferences.pref_minimize_on_copy) {
+            window.close();
+        }
+    };
 
     card.addEventListener('click', async () => {
         if (tapToReveal && codeNode.classList.contains('masked')) {
@@ -462,21 +493,18 @@ function createOtpCard(entry, preferences) {
             return;
         }
 
-        if (copyBehavior === 'NEVER') return;
-
-        if (copyBehavior === 'DOUBLETAP') {
-            if (!clickTimeout) {
-                clickTimeout = setTimeout(() => { clickTimeout = null; }, 300);
-            } else {
+        if (copyBehavior === 'SINGLETAP') {
+            await executeCopy();
+        } else if (copyBehavior === 'DOUBLETAP') {
+            if (clickTimeout) {
                 clearTimeout(clickTimeout);
                 clickTimeout = null;
-                executeCopy(card, entry, preferences);
+                await executeCopy();
+            } else {
+                clickTimeout = setTimeout(() => { clickTimeout = null; }, 300);
             }
-        } else {
-            executeCopy(card, entry, preferences);
         }
     });
-
     return card;
 }
 
@@ -648,6 +676,17 @@ function updateProgressRings(remaining = 30 - (Math.floor(Date.now() / 1000) % 3
 
     document.querySelectorAll('.ring-seconds').forEach(secNode => {
         secNode.textContent = remaining;
+    });
+
+    document.querySelectorAll('.otp-card').forEach(card => {
+        const codeNode = card.querySelector('.otp-code');
+        if (codeNode && !codeNode.classList.contains('masked')) {
+            if (remaining <= 7) {
+                codeNode.classList.add('expiring');
+            } else {
+                codeNode.classList.remove('expiring');
+            }
+        }
     });
 }
 
