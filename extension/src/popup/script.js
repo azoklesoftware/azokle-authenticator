@@ -148,8 +148,12 @@ function bindEvents() {
     });
     
     ui.lockBtn.addEventListener('click', () => {
-        if (masterKey && masterKey.buffer) {
-            try { new Uint8Array(masterKey.buffer).fill(0); } catch(e){}
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+        }
+        if (masterKey) {
+            try { new Uint8Array(masterKey.buffer || masterKey).fill(0); } catch(e){}
         }
         masterKey = null;
         chrome.runtime.sendMessage({ type: "LOCK_VAULT" }, () => window.close());
@@ -506,7 +510,7 @@ function showToast(message) {
 async function handleAddEntry() {
     const issuer = ui.addIssuer.value.trim();
     const name = ui.addAccount.value.trim();
-    const secret = ui.addSecret.value.trim();
+    const secret = ui.addSecret.value.trim().replace(/[\s\-]+/g, '');
 
     if (!issuer || !secret) {
         alert("Please provide at least an Issuer and Secret Key.");

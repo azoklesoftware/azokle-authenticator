@@ -24,7 +24,11 @@ function truncate(hmacBytes, digits) {
  * @returns {Promise<Uint8Array>}
  */
 async function calculateHmac(secret, counterBytes, algo = 'SHA-1') {
-    const hashName = algo.replace('SHA', 'SHA-').replace('SHA--','SHA-');
+    let hashName = 'SHA-1';
+    const cleanAlgo = String(algo).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (cleanAlgo.includes('256')) hashName = 'SHA-256';
+    else if (cleanAlgo.includes('512')) hashName = 'SHA-512';
+
     const cryptoKey = await crypto.subtle.importKey(
         'raw',
         secret,

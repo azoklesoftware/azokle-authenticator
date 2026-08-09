@@ -24,10 +24,11 @@ function truncate(hmacBytes, digits) {
  */
 export async function generateHOTP(secret, counter, options = {}) {
     const secretBytes = typeof secret === 'string' ? decodeBase32(secret) : secret;
-    const algorithm = (options.algorithm || 'SHA1').toUpperCase();
-    const digits = options.digits || 6;
+    let hashName = 'SHA-1';
+    const cleanAlgo = String(algorithm).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (cleanAlgo.includes('256')) hashName = 'SHA-256';
+    else if (cleanAlgo.includes('512')) hashName = 'SHA-512';
 
-    const hashName = algorithm.replace('SHA', 'SHA-').replace('SHA--','SHA-');
     const cryptoKey = await crypto.subtle.importKey(
         'raw',
         secretBytes,

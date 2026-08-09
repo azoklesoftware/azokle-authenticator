@@ -2,6 +2,16 @@
 import { encodeHex } from '../crypto/hex.js';
 import { encryptAesGcmText } from '../crypto/aes-gcm.js';
 
+function bytesToBase64(bytes) {
+    let bin = '';
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i += 8192) {
+        const chunk = bytes.subarray(i, Math.min(i + 8192, len));
+        bin += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(bin);
+}
+
 /**
  * Encrypts updated vault content with the active masterKey and builds a valid VaultFile JSON string.
  * 
@@ -14,7 +24,7 @@ export async function exportEncryptedVault(vaultContent, masterKey, originalHead
     const jsonText = JSON.stringify(vaultContent, null, 4);
     const { ciphertext, nonce, tag } = await encryptAesGcmText(jsonText, masterKey);
 
-    const base64Ciphertext = btoa(String.fromCharCode(...ciphertext));
+    const base64Ciphertext = bytesToBase64(ciphertext);
 
     const exportHeader = originalHeader ? { ...originalHeader } : {
         slots: [],

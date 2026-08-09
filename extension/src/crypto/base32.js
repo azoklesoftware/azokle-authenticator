@@ -8,7 +8,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
  * @returns {Uint8Array}
  */
 export function decodeBase32(base32) {
-    const cleaned = base32.toUpperCase().replace(/=+$/, '').replace(/\s+/g, '');
+    if (!base32) return new Uint8Array(0);
+    const cleaned = String(base32).toUpperCase().replace(/[\s=\-]+/g, '');
     let bits = 0;
     let value = 0;
     const output = [];

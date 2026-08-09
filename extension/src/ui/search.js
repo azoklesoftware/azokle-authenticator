@@ -18,13 +18,13 @@ export function filterEntriesBySearch(entries, query, mask, groups = []) {
     groups.forEach(g => groupMap.set(g.uuid, (g.name || '').toLowerCase()));
 
     return entries.filter(entry => {
-        if ((mask & SEARCH_IN_ISSUER) && (entry.issuer || '').toLowerCase().includes(q)) {
+        if ((mask & SEARCH_IN_ISSUER) && String(entry.issuer || '').toLowerCase().includes(q)) {
             return true;
         }
-        if ((mask & SEARCH_IN_NAME) && (entry.name || '').toLowerCase().includes(q)) {
+        if ((mask & SEARCH_IN_NAME) && String(entry.name || '').toLowerCase().includes(q)) {
             return true;
         }
-        if ((mask & SEARCH_IN_NOTE) && (entry.note || '').toLowerCase().includes(q)) {
+        if ((mask & SEARCH_IN_NOTE) && String(entry.note || '').toLowerCase().includes(q)) {
             return true;
         }
         if ((mask & SEARCH_IN_GROUPS) && entry.groups && entry.groups.length > 0) {
