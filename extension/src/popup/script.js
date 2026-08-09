@@ -427,7 +427,13 @@ function createOtpCard(entry, preferences) {
 
     generateCode(entry).then(code => {
         const formatted = formatOtpCode(code, grouping);
-        codeNode.textContent = tapToReveal ? '• • • • • •' : formatted;
+        if (tapToReveal) {
+            codeNode.textContent = '••••••';
+            codeNode.classList.add('masked');
+        } else {
+            codeNode.textContent = formatted;
+            codeNode.classList.remove('masked');
+        }
 
         if (showNext && entry.type === 'totp') {
             const period = (entry.info && entry.info.period) || 30;
@@ -445,11 +451,13 @@ function createOtpCard(entry, preferences) {
     let clickTimeout = null;
 
     card.addEventListener('click', async () => {
-        if (tapToReveal && codeNode.textContent.startsWith('•')) {
+        if (tapToReveal && codeNode.classList.contains('masked')) {
             const rawCode = await generateCode(entry);
             codeNode.textContent = formatOtpCode(rawCode, grouping);
+            codeNode.classList.remove('masked');
             setTimeout(() => {
-                codeNode.textContent = '• • • • • •';
+                codeNode.textContent = '••••••';
+                codeNode.classList.add('masked');
             }, (preferences.pref_tap_to_reveal_time || 30) * 1000);
             return;
         }
