@@ -31,21 +31,28 @@
         <main id="view-unlock" class="view active" aria-live="polite">
             <div id="setup-section" class="setup-card hidden">
                 <h2>Welcome to Azokle Auth</h2>
-                <p>Import your vault from Azokle Auth (Android), Bitwarden, or 2FAS.</p>
-                <div class="input-group">
-                    <input type="file" id="vault-file" accept=".azokle,.json,.csv" aria-label="Upload Vault File">
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Import your 2FA vault from Azokle Auth (Android), Bitwarden, or 2FAS.
+                </p>
+                <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Drop vault file here or click to browse">
+                    <span class="drop-zone-icon">📁</span>
+                    <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Drop vault file here</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Supports .azokle, .json, .csv</div>
+                    <input type="file" id="vault-file" accept=".azokle,.json,.csv" class="hidden">
                 </div>
             </div>
 
             <div id="unlock-section" class="hidden">
                 <h2>Unlock Vault</h2>
-                <p>Enter your master password to access your authentication codes securely.</p>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Enter your master password to access your authentication tokens.
+                </p>
                 <div class="input-group">
                     <input type="password" id="master-password" placeholder="Master Password" aria-label="Master Password" autocomplete="off" spellcheck="false" />
                 </div>
                 <button id="unlock-btn" class="primary-btn">
-                    <span>Unlock</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <span>Unlock Vault</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
                 <div id="unlock-error" class="error-text hidden" aria-live="assertive">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
@@ -56,7 +63,7 @@
 
         <!-- View: Main OTP Vault -->
         <main id="view-otp" class="view hidden" aria-live="polite">
-            <!-- Suggested Token Card (Active Tab Matching) -->
+            <!-- Suggested Token Card (Active Tab Domain Matching) -->
             <div id="suggested-section" class="suggested-section hidden">
                 <div class="suggested-label">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
@@ -65,121 +72,126 @@
                 <div id="suggested-card-container"></div>
             </div>
 
-            <!-- Search & Filter Controls -->
-            <div class="controls-bar">
+            <!-- Controls Bar (2-Row Design) -->
+            <div class="controls-container">
                 <div class="search-box">
                     <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input type="text" id="search-input" placeholder="Search issuer, account..." aria-label="Search entries">
+                    <button id="clear-search-btn" class="clear-search-btn hidden" aria-label="Clear search">✕</button>
                 </div>
-                <select id="sort-select" class="sort-select" aria-label="Sort Order">
-                    <option value="ISSUER">Sort: Issuer (A-Z)</option>
-                    <option value="ISSUER_REVERSED">Sort: Issuer (Z-A)</option>
-                    <option value="ACCOUNT">Sort: Account (A-Z)</option>
-                    <option value="ACCOUNT_REVERSED">Sort: Account (Z-A)</option>
-                    <option value="USAGE_COUNT">Sort: Usage Count</option>
-                    <option value="LAST_USED">Sort: Last Used</option>
-                    <option value="CUSTOM">Sort: Custom</option>
-                </select>
-                <select id="view-mode-select" class="sort-select" aria-label="View Mode">
-                    <option value="NORMAL">Normal</option>
-                    <option value="COMPACT">Compact</option>
-                    <option value="SMALL">Small</option>
-                    <option value="TILES">Tiles (Grid)</option>
-                </select>
+                <div class="controls-row">
+                    <div class="btn-group" role="group" aria-label="Sort options">
+                        <button class="btn-group-item active" data-sort="ISSUER" title="Sort Issuer A-Z">AZ↓</button>
+                        <button class="btn-group-item" data-sort="USAGE_COUNT" title="Sort Most Used">🔥</button>
+                        <button class="btn-group-item" data-sort="LAST_USED" title="Sort Recently Used">🕐</button>
+                    </div>
+                    <div class="btn-group" role="group" aria-label="View mode options">
+                        <button class="btn-group-item active" data-mode="NORMAL" title="Normal View">Card</button>
+                        <button class="btn-group-item" data-mode="COMPACT" title="Compact View">Compact</button>
+                        <button class="btn-group-item" data-mode="TILES" title="Tiles Grid">Grid</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Group Chips Bar -->
-            <div id="group-chips" class="group-chips">
-                <!-- Group chips dynamically injected -->
-            </div>
+            <div id="group-chips" class="group-chips"></div>
 
             <!-- OTP List Container -->
-            <div id="otp-list" class="otp-list view-normal">
-                <!-- Cards dynamically injected -->
-            </div>
+            <div id="otp-list" class="otp-list"></div>
         </main>
 
-        <!-- Modal: Settings Panel -->
-        <div id="settings-modal" class="modal hidden">
-            <div class="modal-content glass-card wide-modal">
-                <h3>Preferences & Tools</h3>
+        <!-- Bottom-Drawer Modal: Settings -->
+        <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <div class="drawer-content">
+                <h3 id="settings-title" style="margin-bottom: 12px;">Preferences & Tools</h3>
                 
-                <div class="pref-row">
-                    <label for="pref-tap-reveal">Tap-to-Reveal Codes</label>
-                    <input type="checkbox" id="pref-tap-reveal">
+                <div class="drawer-tabs">
+                    <button class="tab-btn active" data-tab="tab-display">Display</button>
+                    <button class="tab-btn" data-tab="tab-security">Security</button>
+                    <button class="tab-btn" data-tab="tab-data">Data Tools</button>
                 </div>
 
-                <div class="pref-row">
-                    <label for="pref-show-next">Show Next Code Preview</label>
-                    <input type="checkbox" id="pref-show-next">
+                <!-- Tab: Display -->
+                <div id="tab-display" class="tab-pane">
+                    <label class="toggle">
+                        <span class="toggle-label">Tap-to-Reveal Codes</span>
+                        <input type="checkbox" id="pref-tap-reveal" class="hidden">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                    <label class="toggle">
+                        <span class="toggle-label">Show Next Code Preview</span>
+                        <input type="checkbox" id="pref-show-next" class="hidden">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                    <div style="margin-top: 12px;">
+                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Digit Grouping Mode</label>
+                        <select id="pref-code-grouping" class="secondary-btn" style="width: 100%; text-align: left;">
+                            <option value="GROUPING_THREES">123 456 (Threes)</option>
+                            <option value="GROUPING_TWOS">12 34 56 (Twos)</option>
+                            <option value="GROUPING_FOURS">1234 5678 (Fours)</option>
+                            <option value="HALVES">Midpoint Split</option>
+                            <option value="NO_GROUPING">No Spaces</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="pref-row">
-                    <label for="pref-minimize-copy">Minimize on Copy</label>
-                    <input type="checkbox" id="pref-minimize-copy">
+                <!-- Tab: Security -->
+                <div id="tab-security" class="tab-pane hidden">
+                    <label class="toggle">
+                        <span class="toggle-label">Minimize Window on Copy</span>
+                        <input type="checkbox" id="pref-minimize-copy" class="hidden">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </label>
+                    <div style="margin-top: 12px; margin-bottom: 14px;">
+                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Copy Behavior</label>
+                        <select id="pref-copy-behavior" class="secondary-btn" style="width: 100%; text-align: left;">
+                            <option value="SINGLETAP">Single Tap</option>
+                            <option value="DOUBLETAP">Double Tap</option>
+                            <option value="NEVER">Disabled</option>
+                        </select>
+                    </div>
+                    <button id="view-audit-btn" class="secondary-btn">View Security Audit Log</button>
                 </div>
 
-                <div class="pref-row">
-                    <label for="pref-code-grouping">Digit Grouping</label>
-                    <select id="pref-code-grouping" class="sort-select">
-                        <option value="GROUPING_THREES">123 456 (Threes)</option>
-                        <option value="GROUPING_TWOS">12 34 56 (Twos)</option>
-                        <option value="GROUPING_FOURS">1234 5678 (Fours)</option>
-                        <option value="HALVES">Midpoint Split</option>
-                        <option value="NO_GROUPING">No Spaces</option>
-                    </select>
+                <!-- Tab: Data Tools -->
+                <div id="tab-data" class="tab-pane hidden">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button id="export-azokle-btn" class="secondary-btn">Export Encrypted (.azokle)</button>
+                        <button id="export-html-btn" class="secondary-btn">Export HTML (with QR codes)</button>
+                    </div>
                 </div>
 
-                <div class="pref-row">
-                    <label for="pref-copy-behavior">Copy Behavior</label>
-                    <select id="pref-copy-behavior" class="sort-select">
-                        <option value="SINGLETAP">Single Tap</option>
-                        <option value="DOUBLETAP">Double Tap</option>
-                        <option value="NEVER">Disabled</option>
-                    </select>
-                </div>
-
-                <div class="modal-divider"></div>
-
-                <div class="modal-actions-column">
-                    <button id="export-azokle-btn" class="secondary-btn full-width">Export Encrypted (.azokle)</button>
-                    <button id="export-html-btn" class="secondary-btn full-width">Export HTML (with QR codes)</button>
-                    <button id="view-audit-btn" class="secondary-btn full-width">View Security Audit Log</button>
-                </div>
-
-                <div class="modal-actions">
-                    <button id="settings-close-btn" class="primary-btn">Close</button>
+                <div style="margin-top: 18px;">
+                    <button id="settings-close-btn" class="primary-btn">Close Preferences</button>
                 </div>
             </div>
         </div>
 
         <!-- Modal: Audit Log -->
-        <div id="audit-modal" class="modal hidden">
-            <div class="modal-content glass-card wide-modal">
-                <h3>Security Audit Log</h3>
-                <div id="audit-log-list" class="audit-log-list">
-                    <!-- Audit logs injected -->
-                </div>
-                <div class="modal-actions">
-                    <button id="audit-close-btn" class="primary-btn">Close</button>
+        <div id="audit-modal" class="modal" role="dialog" aria-modal="true">
+            <div class="drawer-content">
+                <h3 style="margin-bottom: 12px;">Security Audit Log</h3>
+                <div id="audit-log-list" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;"></div>
+                <div style="margin-top: 14px;">
+                    <button id="audit-close-btn" class="primary-btn">Close Audit Log</button>
                 </div>
             </div>
         </div>
 
         <!-- Modal: Add New Entry -->
-        <div id="add-modal" class="modal hidden">
-            <div class="modal-content glass-card">
-                <h3>Add TOTP Entry</h3>
-                <div class="input-group">
+        <div id="add-modal" class="modal" role="dialog" aria-modal="true">
+            <div class="drawer-content">
+                <h3 style="margin-bottom: 12px;">Add TOTP Entry</h3>
+                <div class="input-group" style="margin-bottom: 10px;">
                     <input type="text" id="add-issuer" placeholder="Service / Issuer (e.g. GitHub)" autocomplete="off">
                 </div>
-                <div class="input-group">
+                <div class="input-group" style="margin-bottom: 10px;">
                     <input type="text" id="add-account" placeholder="Account / Email (e.g. user@domain)" autocomplete="off">
                 </div>
-                <div class="input-group">
+                <div class="input-group" style="margin-bottom: 14px;">
                     <input type="text" id="add-secret" placeholder="Secret Key (Base32)" autocomplete="off">
                 </div>
-                <div class="modal-actions">
+                <div style="display: flex; gap: 8px;">
                     <button id="add-cancel-btn" class="secondary-btn">Cancel</button>
                     <button id="add-submit-btn" class="primary-btn">Save Entry</button>
                 </div>
@@ -187,35 +199,41 @@
         </div>
 
         <!-- Modal: PIN Prompt for mOTP / Yandex -->
-        <div id="pin-modal" class="modal hidden">
-            <div class="modal-content glass-card">
-                <h3>Enter PIN</h3>
-                <p id="pin-modal-desc">This entry requires a PIN to generate codes.</p>
-                <input type="password" id="pin-input" placeholder="4-digit PIN" maxlength="16" autocomplete="off">
-                <div class="modal-actions">
+        <div id="pin-modal" class="modal" role="dialog" aria-modal="true">
+            <div class="drawer-content">
+                <h3 style="margin-bottom: 8px;">Enter PIN</h3>
+                <p id="pin-modal-desc" style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">This entry requires a PIN to generate codes.</p>
+                <input type="password" id="pin-input" placeholder="4-digit PIN" maxlength="16" autocomplete="off" style="margin-bottom: 14px;">
+                <div style="display: flex; gap: 8px;">
                     <button id="pin-cancel-btn" class="secondary-btn">Cancel</button>
-                    <button id="pin-submit-btn" class="primary-btn">Submit</button>
+                    <button id="pin-submit-btn" class="primary-btn">Submit PIN</button>
                 </div>
             </div>
         </div>
+
+        <!-- Floating Toast Banner Container -->
+        <div id="toast-banner" class="toast-notification">Copied to clipboard!</div>
     </div>
 
-    <!-- OTP Card Template -->
+    <!-- Enhanced OTP Card Template -->
     <template id="otp-card-template">
-        <div class="otp-card" role="button" tabindex="0" aria-label="Copy code">
+        <div class="otp-card" role="button" tabindex="0" aria-label="Copy authentication code">
+            <div class="type-strip"></div>
             <div class="otp-header">
                 <div class="otp-info">
                     <div class="otp-badge-row">
+                        <span class="type-badge">TOTP</span>
                         <span class="otp-issuer"></span>
                         <span class="favorite-star hidden">⭐</span>
                     </div>
                     <span class="otp-account"></span>
                 </div>
-                <div class="otp-ring-wrapper">
-                    <svg class="progress-ring" viewBox="0 0 24 24">
-                        <circle class="progress-ring-circle" cx="12" cy="12" r="10"></circle>
-                        <circle class="progress-ring-value" cx="12" cy="12" r="10" stroke-dasharray="62.831" stroke-dashoffset="0"></circle>
+                <div class="ring-container">
+                    <svg class="progress-ring" viewBox="0 0 28 28">
+                        <circle class="progress-ring-circle" cx="14" cy="14" r="11"></circle>
+                        <circle class="progress-ring-value" cx="14" cy="14" r="11" stroke-dasharray="69.115" stroke-dashoffset="0"></circle>
                     </svg>
+                    <span class="ring-seconds">30</span>
                 </div>
             </div>
             <div class="otp-code-container">

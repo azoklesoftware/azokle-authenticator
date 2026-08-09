@@ -15,6 +15,7 @@ let originalVaultHeader = null;
 let refreshInterval = null;
 let pendingPinCallback = null;
 let activeTabDomain = null;
+let toastTimeout = null;
 
 // DOM Elements
 const views = {
@@ -33,17 +34,18 @@ const ui = {
     lockBtn: document.getElementById('lock-btn'),
     settingsBtn: document.getElementById('settings-btn'),
     addBtn: document.getElementById('add-btn'),
+    dropZone: document.getElementById('drop-zone'),
     vaultFile: document.getElementById('vault-file'),
     masterPassword: document.getElementById('master-password'),
     unlockBtn: document.getElementById('unlock-btn'),
     unlockError: document.getElementById('unlock-error'),
     otpList: document.getElementById('otp-list'),
     searchInput: document.getElementById('search-input'),
-    sortSelect: document.getElementById('sort-select'),
-    viewModeSelect: document.getElementById('view-mode-select'),
+    clearSearchBtn: document.getElementById('clear-search-btn'),
     groupChips: document.getElementById('group-chips'),
+    toastBanner: document.getElementById('toast-banner'),
     template: document.getElementById('otp-card-template'),
-    // Settings Modal
+    // Settings Drawer Modal
     settingsModal: document.getElementById('settings-modal'),
     settingsCloseBtn: document.getElementById('settings-close-btn'),
     prefTapReveal: document.getElementById('pref-tap-reveal'),
@@ -76,18 +78,17 @@ async function init() {
     await store.init();
     bindEvents();
     
-    // Check active tab domain
     activeTabDomain = await getActiveTabDomain();
 
-    // Sync preferences to controls
+    // Sync preferences
     const prefs = store.getState().preferences;
-    ui.sortSelect.value = prefs.pref_current_sort_category;
-    ui.viewModeSelect.value = prefs.pref_current_view_mode;
     ui.prefTapReveal.checked = prefs.pref_tap_to_reveal;
     ui.prefShowNext.checked = prefs.pref_show_next_code;
     ui.prefMinimizeCopy.checked = prefs.pref_minimize_on_copy;
     ui.prefCodeGrouping.value = prefs.pref_code_group_size_string;
     ui.prefCopyBehavior.value = prefs.pref_current_copy_behavior;
+
+    syncButtonGroups(prefs);
 
     // Load encrypted vault
     const storage = await chrome.storage.local.get('encryptedVault');
@@ -112,15 +113,41 @@ async function init() {
     });
 }
 
+function syncButtonGroups(prefs) {
+    document.querySelectorAll('.btn-group-item[data-sort]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sort === prefs.pref_current_sort_category);
+    });
+    document.querySelectorAll('.btn-group-item[data-mode]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === prefs.pref_current_view_mode);
+    });
+}
+
 function bindEvents() {
-    ui.vaultFile.addEventListener('change', handleFileUpload);
+    // Drag & Drop File Handling
+    ui.dropZone.addEventListener('click', () => ui.vaultFile.click());
+    ui.dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        ui.dropZone.classList.add('drag-over');
+    });
+    ui.dropZone.addEventListener('dragleave', () => ui.dropZone.classList.remove('drag-over'));
+    ui.dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        ui.dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) {
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    ui.vaultFile.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
     ui.unlockBtn.addEventListener('click', handleUnlock);
     ui.masterPassword.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleUnlock();
     });
     
     ui.lockBtn.addEventListener('click', () => {
-        // Zero out master key bytes in memory for security
         if (masterKey && masterKey.buffer) {
             try { new Uint8Array(masterKey.buffer).fill(0); } catch(e){}
         }
@@ -128,32 +155,67 @@ function bindEvents() {
         chrome.runtime.sendMessage({ type: "LOCK_VAULT" }, () => window.close());
     });
 
-    ui.settingsBtn.addEventListener('click', () => ui.settingsModal.classList.remove('hidden'));
-    ui.settingsCloseBtn.addEventListener('click', () => ui.settingsModal.classList.add('hidden'));
+    ui.settingsBtn.addEventListener('click', () => openModal(ui.settingsModal));
+    ui.settingsCloseBtn.addEventListener('click', () => closeModal(ui.settingsModal));
 
     ui.exportAzokleBtn.addEventListener('click', handleExportAzokle);
     ui.exportHtmlBtn.addEventListener('click', handleExportHtml);
     ui.viewAuditBtn.addEventListener('click', showAuditModal);
-    ui.auditCloseBtn.addEventListener('click', () => ui.auditModal.classList.add('hidden'));
+    ui.auditCloseBtn.addEventListener('click', () => closeModal(ui.auditModal));
 
     ui.addBtn.addEventListener('click', () => {
         ui.addIssuer.value = '';
         ui.addAccount.value = '';
         ui.addSecret.value = '';
-        ui.addModal.classList.remove('hidden');
+        openModal(ui.addModal);
         ui.addIssuer.focus();
     });
 
-    ui.addCancelBtn.addEventListener('click', () => ui.addModal.classList.add('hidden'));
+    ui.addCancelBtn.addEventListener('click', () => closeModal(ui.addModal));
     ui.addSubmitBtn.addEventListener('click', handleAddEntry);
 
-    ui.searchInput.addEventListener('input', (e) => store.setSearchQuery(e.target.value));
+    // Search Controls
+    ui.searchInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        ui.clearSearchBtn.classList.toggle('hidden', !val);
+        store.setSearchQuery(val);
+    });
 
-    ui.sortSelect.addEventListener('change', (e) => store.updatePreference('pref_current_sort_category', e.target.value));
+    ui.clearSearchBtn.addEventListener('click', () => {
+        ui.searchInput.value = '';
+        ui.clearSearchBtn.classList.add('hidden');
+        store.setSearchQuery('');
+        ui.searchInput.focus();
+    });
 
-    ui.viewModeSelect.addEventListener('change', (e) => store.updatePreference('pref_current_view_mode', e.target.value));
+    // Segmented Button Groups
+    document.querySelectorAll('.btn-group-item[data-sort]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.btn-group-item[data-sort]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            store.updatePreference('pref_current_sort_category', btn.dataset.sort);
+        });
+    });
 
-    // Preference bindings
+    document.querySelectorAll('.btn-group-item[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.btn-group-item[data-mode]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            store.updatePreference('pref_current_view_mode', btn.dataset.mode);
+        });
+    });
+
+    // Drawer Tabs Switcher
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.remove('hidden');
+        });
+    });
+
+    // Custom Toggles
     ui.prefTapReveal.addEventListener('change', (e) => store.updatePreference('pref_tap_to_reveal', e.target.checked));
     ui.prefShowNext.addEventListener('change', (e) => store.updatePreference('pref_show_next_code', e.target.checked));
     ui.prefMinimizeCopy.addEventListener('change', (e) => store.updatePreference('pref_minimize_on_copy', e.target.checked));
@@ -162,8 +224,12 @@ function bindEvents() {
 
     ui.pinSubmitBtn.addEventListener('click', handlePinSubmit);
     ui.pinCancelBtn.addEventListener('click', handlePinCancel);
-    ui.pinInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handlePinSubmit();
+
+    // Keyboard accessibility: Escape key closes active modal
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => closeModal(modal));
+        }
     });
 
     chrome.runtime.onMessage.addListener((request) => {
@@ -171,10 +237,15 @@ function bindEvents() {
     });
 }
 
-async function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+function openModal(modalEl) {
+    modalEl.classList.add('active');
+}
 
+function closeModal(modalEl) {
+    modalEl.classList.remove('active');
+}
+
+function handleFile(file) {
     const reader = new FileReader();
     reader.onload = async (event) => {
         try {
@@ -184,7 +255,7 @@ async function handleFileUpload(e) {
                 const newVault = { version: 3, entries: externalEntries, groups: [] };
                 store.setVault(newVault);
                 showOtpView();
-                alert(`Successfully imported ${externalEntries.length} entries!`);
+                showToast(`Imported ${externalEntries.length} entries!`);
                 return;
             }
 
@@ -209,6 +280,9 @@ async function handleUnlock() {
     ui.unlockBtn.disabled = true;
     ui.unlockBtn.querySelector('span').textContent = 'Deriving Key (scrypt)...';
 
+    // Show Skeleton Loaders during decryption
+    showSkeletons();
+
     try {
         const { content, masterKey: derivedKey } = await parseAndDecryptVault(currentRawVaultContent, password);
         masterKey = derivedKey;
@@ -229,7 +303,7 @@ async function handleUnlock() {
         ui.unlockError.classList.remove('hidden');
     } finally {
         ui.unlockBtn.disabled = false;
-        ui.unlockBtn.querySelector('span').textContent = 'Unlock';
+        ui.unlockBtn.querySelector('span').textContent = 'Unlock Vault';
         ui.masterPassword.value = '';
     }
 }
@@ -254,6 +328,14 @@ function showOtpView() {
     renderGroupChips();
     renderOtps();
     startOtpLoop();
+}
+
+function showSkeletons() {
+    ui.otpList.innerHTML = `
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+    `;
 }
 
 function renderGroupChips() {
@@ -281,7 +363,6 @@ function renderOtps() {
     const { preferences } = store.getState();
     const entries = store.getFilteredAndSortedEntries();
     
-    // ViewMode styling
     const viewModeClass = `view-${(preferences.pref_current_view_mode || 'NORMAL').toLowerCase()}`;
     ui.otpList.className = `otp-list ${viewModeClass}`;
     ui.otpList.innerHTML = '';
@@ -302,7 +383,12 @@ function renderOtps() {
     }
 
     if (entries.length === 0) {
-        ui.otpList.innerHTML = `<div style="text-align: center; color: var(--text-secondary); margin-top: 40px;">No authentication tokens found.</div>`;
+        ui.otpList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">🔐</div>
+                <h3>No Authentication Tokens</h3>
+                <p style="font-size:12px;">Try a different search or click "+" to add an entry.</p>
+            </div>`;
         return;
     }
 
@@ -322,7 +408,10 @@ function createOtpCard(entry, preferences) {
     const codeNode = clone.querySelector('.otp-code');
     const nextCodeNode = clone.querySelector('.otp-next-code');
     const starNode = clone.querySelector('.favorite-star');
+    const typeBadge = clone.querySelector('.type-badge');
 
+    card.dataset.type = entry.type || 'totp';
+    typeBadge.textContent = (entry.type || 'totp').toUpperCase();
     issuerNode.textContent = entry.issuer || 'Unknown';
     accountNode.textContent = entry.name || 'Account';
     
@@ -332,7 +421,6 @@ function createOtpCard(entry, preferences) {
     const grouping = preferences.pref_code_group_size_string;
     const showNext = preferences.pref_show_next_code;
 
-    // Code calculation
     generateCode(entry).then(code => {
         const formatted = formatOtpCode(code, grouping);
         codeNode.textContent = tapToReveal ? '• • • • • •' : formatted;
@@ -350,8 +438,8 @@ function createOtpCard(entry, preferences) {
     });
 
     const copyBehavior = preferences.pref_current_copy_behavior || 'SINGLETAP';
-    
     let clickTimeout = null;
+
     card.addEventListener('click', async () => {
         if (tapToReveal && codeNode.textContent.startsWith('•')) {
             const rawCode = await generateCode(entry);
@@ -399,12 +487,20 @@ function performClipboardWrite(cardNode, entryUuid, rawCode, preferences) {
     navigator.clipboard.writeText(rawCode);
     store.incrementUsage(entryUuid);
 
-    cardNode.classList.add('copied');
-    setTimeout(() => cardNode.classList.remove('copied'), 1500);
+    showToast("Copied to clipboard!");
 
     if (preferences.pref_minimize_on_copy) {
         setTimeout(() => window.close(), 300);
     }
+}
+
+function showToast(message) {
+    ui.toastBanner.textContent = message;
+    ui.toastBanner.classList.add('show');
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+        ui.toastBanner.classList.remove('show');
+    }, 1800);
 }
 
 async function handleAddEntry() {
@@ -425,19 +521,14 @@ async function handleAddEntry() {
         note: '',
         favorite: false,
         groups: [],
-        info: {
-            secret,
-            algo: 'SHA1',
-            digits: 6,
-            period: 30
-        }
+        info: { secret, algo: 'SHA1', digits: 6, period: 30 }
     };
 
     const currentVault = store.getState();
     const updatedEntries = [newEntry, ...currentVault.entries];
     
     store.setState({ entries: updatedEntries });
-    ui.addModal.classList.add('hidden');
+    closeModal(ui.addModal);
 
     if (masterKey) {
         const fullVaultContent = { version: 3, entries: updatedEntries, groups: currentVault.groups };
@@ -452,10 +543,8 @@ async function handleExportAzokle() {
         alert("Vault must be unlocked to export.");
         return;
     }
-
     const currentVault = store.getState();
     const fullVaultContent = { version: 3, entries: currentVault.entries, groups: currentVault.groups };
-    
     const encryptedJson = await exportEncryptedVault(fullVaultContent, masterKey, originalVaultHeader);
     downloadVaultFile(encryptedJson, "azokle_backup.azokle");
     logAuditEvent(EventType.VAULT_EXPORTED, "azokle_backup.azokle");
@@ -469,47 +558,49 @@ function handleExportHtml() {
 }
 
 async function showAuditModal() {
-    ui.settingsModal.classList.add('hidden');
+    closeModal(ui.settingsModal);
     ui.auditLogList.innerHTML = '';
     
     const logs = await getAuditLogs();
     if (logs.length === 0) {
-        ui.auditLogList.innerHTML = `<div style="text-align:center; color:var(--text-secondary); padding:20px;">No audit events recorded.</div>`;
+        ui.auditLogList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">No audit events recorded.</div>`;
     } else {
         logs.forEach(log => {
             const div = document.createElement('div');
-            div.className = 'audit-item';
+            div.style.cssText = "padding:8px; background:rgba(255,255,255,0.04); border-radius:6px; font-size:11px;";
             const timeStr = new Date(log.timestamp).toLocaleTimeString();
             div.innerHTML = `
-                <span class="audit-time">${timeStr}</span>
-                <div class="audit-type">${log.eventType}</div>
+                <div style="display:flex; justify-content:space-between; font-weight:600; color:var(--primary-color);">
+                    <span>${log.eventType}</span>
+                    <span style="color:var(--text-muted); font-size:10px;">${timeStr}</span>
+                </div>
                 <div style="color:var(--text-secondary); margin-top:2px;">${log.reference || ''}</div>
             `;
             ui.auditLogList.appendChild(div);
         });
     }
 
-    ui.auditModal.classList.remove('hidden');
+    openModal(ui.auditModal);
 }
 
 function promptPin(entry, callback) {
     pendingPinCallback = callback;
     ui.pinInput.value = '';
-    ui.pinModal.classList.remove('hidden');
+    openModal(ui.pinModal);
     ui.pinInput.focus();
 }
 
 function handlePinSubmit() {
     const pin = ui.pinInput.value.trim();
     if (pin && pendingPinCallback) {
-        ui.pinModal.classList.add('hidden');
+        closeModal(ui.pinModal);
         pendingPinCallback(pin);
         pendingPinCallback = null;
     }
 }
 
 function handlePinCancel() {
-    ui.pinModal.classList.add('hidden');
+    closeModal(ui.pinModal);
     pendingPinCallback = null;
 }
 
@@ -527,7 +618,7 @@ function startOtpLoop() {
 }
 
 function updateProgressRings(remaining = 30 - (Math.floor(Date.now() / 1000) % 30)) {
-    const circumference = 62.831;
+    const circumference = 69.115;
     const offset = circumference - (remaining / 30) * circumference;
 
     document.querySelectorAll('.progress-ring-value').forEach(ring => {
@@ -541,6 +632,10 @@ function updateProgressRings(remaining = 30 - (Math.floor(Date.now() / 1000) % 3
         } else {
             ring.classList.remove('warning', 'danger');
         }
+    });
+
+    document.querySelectorAll('.ring-seconds').forEach(secNode => {
+        secNode.textContent = remaining;
     });
 }
 
