@@ -202,11 +202,11 @@
         <item name="widgetLayout">@layout/view_preference_switch</item>
     </style>
 
-    <style name="Widget.AzokleAuth.EntryCardView" parent="Widget.Material3.CardView.Elevated">
+    <style name="Widget.AzokleAuth.EntryCardView" parent="Widget.Material3.CardView.Outlined">
         <item name="materialThemeOverlay">@style/ThemeOverlay.AzokleAuth.EntryCardView</item>
     </style>
 
-    <style name="Widget.AzokleAuth.CompactEntryCardView" parent="Widget.Material3.CardView.Elevated">
+    <style name="Widget.AzokleAuth.CompactEntryCardView" parent="Widget.Material3.CardView.Outlined">
         <item name="materialThemeOverlay">@style/ThemeOverlay.AzokleAuth.CompactEntryCardView</item>
     </style>
 
@@ -231,6 +231,20 @@
         <item name="actionButtonStyle">@style/Widget.AppCompat.ActionButton</item>
         <!-- The hack below is necessary to force the action mode overflow menu to the right color -->
         <item name="actionBarPopupTheme">@style/Widget.Material3.PopupMenu.ContextMenu</item>
+    </style>
+
+    <style name="TextAppearance.AzokleAuth.Toolbar.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">sans-serif-black</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextAppearance.AzokleAuth.Toolbar.Title.White" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">sans-serif-black</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="ThemeOverlay.AzokleAuth.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog.Centered">

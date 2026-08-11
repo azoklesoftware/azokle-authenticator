@@ -262,6 +262,12 @@
     <string name="saving_profile_error">Error saving profile</string>
     <string name="saving_assign_icons_error">Error assigning icons</string>
     <string name="welcome">Welcome</string>
+    <string name="welcome_hero_title">Everything 2FA.</string>
+    <string name="welcome_hero_subtitle">Happening now.\nProtect your accounts with zero-telemetry offline 2FA.</string>
+    <string name="create_vault">Create Vault</string>
+    <string name="import_azokle_auth_json">Import Azokle Auth JSON</string>
+    <string name="welcome_or">or</string>
+    <string name="welcome_privacy_footer">100% Offline • Zero Data Collection • AES-256 Encryption</string>
     <string name="app_description">Azokle Auth is a free, secure and open source 2FA app</string>
     <string name="setup_completed">Setup completed</string>
     <string name="setup_completed_description">Azokle Auth has been set up and is ready to go.</string>

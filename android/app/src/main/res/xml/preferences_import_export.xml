@@ -6,20 +6,20 @@
         android:key="pref_import"
         android:title="@string/pref_import_file_title"
         android:summary="@string/pref_import_file_summary"
-        app:iconSpaceReserved="false"/>
+        app:icon="@drawable/ic_outline_add_24" />
     <Preference
         android:key="pref_import_app"
         android:title="@string/pref_import_app_title"
         android:summary="@string/pref_import_app_summary"
-        app:iconSpaceReserved="false"/>
+        app:icon="@drawable/ic_outline_android_24" />
     <Preference
         android:key="pref_export"
         android:title="@string/pref_export_title"
         android:summary="@string/pref_export_summary"
-        app:iconSpaceReserved="false"/>
+        app:icon="@drawable/ic_export_notes" />
     <Preference
         android:key="pref_google_auth_style_export"
         android:title="@string/pref_other_auth_export_title"
         android:summary="@string/pref_other_auth_export_descriptor"
-        app:iconSpaceReserved="false"/>
+        app:icon="@drawable/ic_outline_qr_code_2_24" />
 </PreferenceScreen>

@@ -6,8 +6,102 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@android:color/black"
     tools:context="com.azokle.authenticator.ui.ScannerActivity">
 
+    <!-- Camera Preview View -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Scanner Overlay Viewfinder Mask -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <!-- Center Scanner Reticle Frame -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/scanner_target"
+            style="@style/Widget.Material3.CardView.Outlined"
+            android:layout_width="270dp"
+            android:layout_height="270dp"
+            android:layout_centerInParent="true"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@android:color/white"
+            app:strokeWidth="2.5dp">
+
+            <!-- Target Center Crosshair Line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_gravity="center"
+                android:background="@android:color/white"
+                android:alpha="0.3" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Top Dim Mask -->
+        <View
+            android:id="@+id/mask_top"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_above="@id/scanner_target"
+            android:layout_alignParentTop="true"
+            android:background="#99000000" />
+
+        <!-- Bottom Dim Mask -->
+        <View
+            android:id="@+id/mask_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/scanner_target"
+            android:layout_alignParentBottom="true"
+            android:background="#99000000" />
+
+        <!-- Left Dim Mask -->
+        <View
+            android:id="@+id/mask_left"
+            android:layout_width="match_parent"
+            android:layout_height="270dp"
+            android:layout_alignTop="@id/scanner_target"
+            android:layout_alignBottom="@id/scanner_target"
+            android:layout_toStartOf="@id/scanner_target"
+            android:layout_alignParentStart="true"
+            android:background="#99000000" />
+
+        <!-- Right Dim Mask -->
+        <View
+            android:id="@+id/mask_right"
+            android:layout_width="match_parent"
+            android:layout_height="270dp"
+            android:layout_alignTop="@id/scanner_target"
+            android:layout_alignBottom="@id/scanner_target"
+            android:layout_toEndOf="@id/scanner_target"
+            android:layout_alignParentEnd="true"
+            android:background="#99000000" />
+
+        <!-- Floating Instruction Pill below Scanner Reticle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/scanner_target"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="28dp"
+            android:text="@string/scan"
+            android:textColor="@android:color/white"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="15sp"
+            android:background="@drawable/rounded_popup"
+            android:backgroundTint="#B3000000"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp" />
+
+    </RelativeLayout>
+
+    <!-- Header App Bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
@@ -16,16 +110,13 @@
         android:translationZ="0.1dp"
         app:elevation="0dp"
         android:fitsSystemWindows="true">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:titleTextColor="?attr/colorOnDark" />
+            app:titleTextAppearance="@style/TextAppearance.AzokleAuth.Toolbar.Title.White"
+            app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.camera.view.PreviewView
-        android:id="@+id/preview_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

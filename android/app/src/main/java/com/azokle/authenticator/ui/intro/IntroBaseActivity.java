@@ -157,8 +157,14 @@ public abstract class IntroBaseActivity extends AzokleAuthActivity implements In
                 pos != 0 && pos != _slides.size() - 1
                         ? View.VISIBLE
                         : View.INVISIBLE);
+        _btnNext.setVisibility(
+                pos != 0
+                        ? View.VISIBLE
+                        : View.INVISIBLE);
         if (pos == _slides.size() - 1) {
             _btnNext.setIconResource(R.drawable.ic_outline_check_24);
+        } else {
+            _btnNext.setIconResource(R.drawable.ic_outline_arrow_right_alt_24);
         }
         _slideIndicator.setSlideCount(_slides.size());
         _slideIndicator.setCurrentSlide(pos);

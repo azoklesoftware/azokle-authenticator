@@ -2,68 +2,140 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="32dp">
+    android:paddingHorizontal="28dp"
+    android:paddingVertical="24dp">
 
-    <TextView
-        android:id="@+id/titleText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/welcome"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        android:layout_marginTop="30dp"
-        android:textStyle="bold"
+    <!-- X-Style Top App Icon -->
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/welcome"
+        android:src="@drawable/app_icon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- X-Style Hero Title -->
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif-black"
+        android:text="@string/welcome_hero_title"
+        android:textColor="?attr/colorOnBackground"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo" />
+
+    <!-- X-Style Hero Subtitle -->
     <TextView
         android:id="@+id/descriptionText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/app_description"
-        android:textAlignment="center"
-        android:textSize="16sp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:lineSpacingExtra="4dp"
+        android:text="@string/welcome_hero_subtitle"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleText" />
 
-    <ImageView
-        android:id="@+id/imgLogo"
-        android:layout_width="210dp"
-        android:layout_height="210dp"
-        android:layout_marginTop="60dp"
-        android:adjustViewBounds="true"
-        android:src="@drawable/app_icon"
-        app:layout_constraintStart_toStartOf="parent"
+    <!-- X-Style Primary Action Button: Create Vault (Anchored to Bottom Section) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCreateVault"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="0dp"
+        android:layout_height="54dp"
+        android:layout_marginBottom="16dp"
+        android:stateListAnimator="@animator/button_press_scale"
+        android:text="@string/create_vault"
+        android:textColor="?android:attr/colorBackground"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:backgroundTint="?attr/colorOnBackground"
+        app:cornerRadius="27dp"
+        app:layout_constraintBottom_toTopOf="@+id/layoutDivider"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/descriptionText"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/btnImport"
-        android:layout_width="wrap_content"
+    <!-- X-Style Divider ("or") -->
+    <LinearLayout
+        android:id="@+id/layoutDivider"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:text="@string/import_vault"
-        android:textSize="11sp"
-        android:layout_marginVertical="10dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/btnImport"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/txtImportHelp"
-        style="@style/Widget.Material3.Button.TonalButton" />
+        app:layout_constraintStart_toStartOf="parent">
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="?attr/colorOutlineVariant" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:text="@string/welcome_or"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="13sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="?attr/colorOutlineVariant" />
+    </LinearLayout>
+
+    <!-- X-Style Secondary Action Button: Import Azokle Auth JSON -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnImport"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="54dp"
+        android:layout_marginBottom="24dp"
+        android:stateListAnimator="@animator/button_press_scale"
+        android:text="@string/import_azokle_auth_json"
+        android:textColor="?attr/colorOnBackground"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:cornerRadius="27dp"
+        app:icon="@drawable/ic_outline_cloud_upload_24"
+        app:iconGravity="textStart"
+        app:iconSize="20dp"
+        app:iconTint="?attr/colorOnBackground"
+        app:strokeColor="?attr/colorOnBackground"
+        app:strokeWidth="1.5dp"
+        app:layout_constraintBottom_toTopOf="@+id/txtImportHelp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- X-Style Footer Privacy Notice -->
     <TextView
         android:id="@+id/txtImportHelp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/import_vault_hint"
-        android:textSize="11sp"
+        android:layout_marginBottom="12dp"
+        android:text="@string/welcome_privacy_footer"
         android:textAlignment="center"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="?attr/colorOnSurfaceDim"
+        android:textSize="11sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintWidth_percent="0.9" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

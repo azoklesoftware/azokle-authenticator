@@ -11,6 +11,7 @@
     android:checkable="true"
     app:checkedIcon="@null"
     app:cardElevation="0dp"
+    android:stateListAnimator="@animator/button_press_scale"
     style="@style/Widget.AzokleAuth.CompactEntryCardView">
 
     <LinearLayout
@@ -126,7 +127,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif-black"
                     tools:text="012 345"
                     android:id="@+id/profile_code"
                     android:layoutDirection="ltr"

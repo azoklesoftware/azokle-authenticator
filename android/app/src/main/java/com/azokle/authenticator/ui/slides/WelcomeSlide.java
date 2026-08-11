@@ -40,6 +40,12 @@ public class WelcomeSlide extends SlideFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_welcome_slide, container, false);
+        
+        View btnCreateVault = view.findViewById(R.id.btnCreateVault);
+        if (btnCreateVault != null) {
+            btnCreateVault.setOnClickListener(v -> goToNextSlide());
+        }
+
         view.findViewById(R.id.btnImport).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");

@@ -22,25 +22,30 @@
 
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="75dp"
-                android:layout_height="75dp"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:tint="?attr/colorOnBackground"
                 android:src="@drawable/ic_timeline_24" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/no_events_title"
-                android:paddingTop="17dp"
-                android:textSize="18sp" />
+                android:paddingTop="24dp"
+                android:fontFamily="sans-serif-black"
+                android:textColor="?attr/colorOnBackground"
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/txt_no_audit_logs"
-                android:layout_width="300dp"
+                android:layout_width="320dp"
                 android:layout_height="wrap_content"
-                android:lineSpacingExtra="5dp"
-                android:paddingTop="7dp"
+                android:lineSpacingExtra="6dp"
+                android:paddingTop="12dp"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:text="@string/no_events_description"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:textSize="15sp"/>
         </LinearLayout>
 
     </LinearLayout>

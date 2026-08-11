@@ -7,105 +7,147 @@
     android:fillViewport="true"
     android:fitsSystemWindows="true"
     tools:context="com.azokle.authenticator.ui.AuthActivity">
-    <LinearLayout
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:paddingHorizontal="28dp"
+        android:paddingVertical="24dp">
 
+        <!-- X-Style Top App Icon -->
+        <ImageView
+            android:id="@+id/imgLogoAuth"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="12dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/authentication_multiline"
+            app:srcCompat="@drawable/ic_azokle_auth_iconx"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- X-Style Headline -->
+        <TextView
+            android:id="@+id/titleAuth"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:fontFamily="sans-serif-black"
+            android:text="@string/authentication_multiline"
+            android:textColor="?attr/colorOnBackground"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imgLogoAuth" />
+
+        <!-- Password Input Container -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/wrapper_password"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:endIconMode="password_toggle"
+            app:startIconDrawable="@drawable/ic_outline_lock_24"
+            app:startIconTint="?attr/colorOnBackground"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/titleAuth">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/text_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Primary Action Button: Unlock (Pill shaped, Black/White theme) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_decrypt"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="24dp"
+            android:stateListAnimator="@animator/button_press_scale"
+            android:text="@string/unlock"
+            android:textColor="?android:attr/colorBackground"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="?attr/colorOnBackground"
+            app:cornerRadius="27dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/wrapper_password" />
+
+        <!-- Secondary Action Button: Use Biometrics (Outlined Pill shaped, Black/White theme) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_biometrics"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="14dp"
+            android:stateListAnimator="@animator/button_press_scale"
+            android:text="@string/auth_use_biometrics"
+            android:textColor="?attr/colorOnBackground"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:cornerRadius="27dp"
+            app:icon="@drawable/ic_outline_touch_app_24"
+            app:iconGravity="textStart"
+            app:iconSize="20dp"
+            app:iconTint="?attr/colorOnBackground"
+            app:strokeColor="?attr/colorOnBackground"
+            app:strokeWidth="1.5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button_decrypt" />
+
+        <!-- Invalidated Biometrics Help Box -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingHorizontal="48dp"
-            android:paddingTop="48dp"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginBottom="20dp"
-                app:srcCompat="@drawable/ic_azokle_auth_iconx" />
+            android:id="@+id/box_biometric_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button_biometrics">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-light"
-                android:singleLine="false"
-                android:text="@string/authentication_multiline"
-                android:textStyle="bold"
-                android:textSize="32sp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="12dp"
-                android:orientation="vertical">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="12dp"
-                    app:hintEnabled="false"
-                    app:passwordToggleEnabled="true"
-                    app:passwordToggleTint="?attr/colorOnSurface">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/text_password"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/password"
-                        android:inputType="textPassword" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingBottom="25dp">
-
-                    <Button
-                        android:id="@+id/button_decrypt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minWidth="125dp"
-                        android:text="@string/unlock" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/button_biometrics"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:minWidth="125dp"
-                    android:text="@string/auth_use_biometrics"
-                    android:visibility="gone" />
-
-                <LinearLayout
-                    android:id="@+id/box_biometric_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/invalidated_biometrics" />
-                </LinearLayout>
-            </LinearLayout>
-
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/invalidated_biometrics"
+                android:textColor="?attr/colorError"
+                android:textSize="13sp" />
         </LinearLayout>
 
+        <!-- Footer Brand Notice -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="12dp"
+            android:paddingVertical="16dp"
             android:text="@string/app_name_full"
-            android:textSize="15sp"
+            android:textAlignment="center"
             android:textAllCaps="true"
-            android:textStyle="bold"
             android:textColor="?attr/colorOnSurfaceDim"
-            android:paddingVertical="50dp" />
-    </LinearLayout>
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

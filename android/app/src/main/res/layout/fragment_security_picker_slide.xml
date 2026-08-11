@@ -1,92 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:id="@+id/main"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="32dp">
+        android:orientation="vertical"
+        android:paddingHorizontal="28dp"
+        android:paddingVertical="24dp">
 
+        <!-- Top Header Icon -->
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:contentDescription="@string/choose_authentication_method"
+            android:src="@drawable/ic_outline_lock_24"
+            app:tint="?attr/colorOnBackground" />
+
+        <!-- Screen Title -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-black"
             android:text="@string/choose_authentication_method"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:layout_marginTop="30dp"
+            android:textColor="?attr/colorOnBackground"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
-        <LinearLayout
+        <!-- Subtitle Explanation -->
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="24dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/authentication_method_explanation"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="15sp" />
+
+        <!-- Security Method Radio Group -->
+        <RadioGroup
+            android:id="@+id/rg_authenticationMethod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp">
+
+            <!-- Biometrics Option -->
+            <RadioButton
+                android:id="@+id/rb_biometrics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:paddingVertical="8dp"
+                android:text="@string/authentication_method_biometrics"
+                android:textColor="?attr/colorOnBackground"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/text_rb_biometrics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="-4dp"
+                android:layout_marginBottom="20dp"
+                android:enabled="false"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/authentication_method_biometrics_description"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="13sp" />
+
+            <!-- Password Option -->
+            <RadioButton
+                android:id="@+id/rb_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:paddingVertical="8dp"
+                android:text="@string/authentication_method_password"
+                android:textColor="?attr/colorOnBackground"
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/authentication_method_explanation"/>
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="-4dp"
+                android:layout_marginBottom="20dp"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/authentication_method_password_description"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="13sp" />
 
-            <RadioGroup
-                android:id="@+id/rg_authenticationMethod"
+            <!-- No Security Option -->
+            <RadioButton
+                android:id="@+id/rb_none"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp">
+                android:paddingVertical="8dp"
+                android:text="@string/authentication_method_none"
+                android:textColor="?attr/colorOnBackground"
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
-                <RadioButton
-                    android:id="@+id/rb_none"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/authentication_method_none"
-                    android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="34dp"
+                android:layout_marginTop="-4dp"
+                android:layout_marginBottom="20dp"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/authentication_method_none_description"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="13sp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginTop="-5dp"
-                    android:text="@string/authentication_method_none_description" />
-
-                <RadioButton
-                    android:id="@+id/rb_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/authentication_method_password"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginTop="-5dp"
-                    android:text="@string/authentication_method_password_description" />
-
-                <RadioButton
-                    android:id="@+id/rb_biometrics"
-                    android:enabled="false"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/authentication_method_biometrics"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/text_rb_biometrics"
-                    android:enabled="false"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginTop="-5dp"
-
-                    android:text="@string/authentication_method_biometrics_description" />
-
-            </RadioGroup>
-
-        </LinearLayout>
+        </RadioGroup>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

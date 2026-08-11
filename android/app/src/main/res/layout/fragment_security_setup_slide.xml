@@ -1,89 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:id="@+id/main"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="32dp">
+        android:orientation="vertical"
+        android:paddingHorizontal="28dp"
+        android:paddingVertical="24dp">
 
+        <!-- Top Header Icon -->
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:contentDescription="@string/set_password"
+            android:src="@drawable/ic_outline_key_24"
+            app:tint="?attr/colorOnBackground" />
+
+        <!-- Screen Title -->
         <TextView
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-black"
             android:text="@string/choose_authentication_method"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:layout_marginTop="30dp"
+            android:textColor="?attr/colorOnBackground"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
+        <!-- Password Warning Text -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:lineSpacingExtra="3dp"
             android:text="@string/authentication_method_password_explanation"
             android:textColor="?attr/colorError"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
+        <!-- Password Inputs Container -->
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="28dp"
+            android:orientation="vertical">
 
+            <!-- Password Input -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/text_password_wrapper"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:endIconMode="password_toggle"
+                app:startIconDrawable="@drawable/ic_outline_lock_24">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/text_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:hint="@string/set_password"
                     android:inputType="textPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Password Confirm Input -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/text_password_confirm_wrapper"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="16dp"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:endIconMode="password_toggle"
+                app:startIconDrawable="@drawable/ic_outline_lock_24">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:hint="@string/set_password_confirm"
                     android:id="@+id/text_password_confirm"
-                    android:inputType="textPassword"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:hint="@string/set_password_confirm"
+                    android:inputType="textPassword"
+                    android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Password Strength Bar -->
             <ProgressBar
                 android:id="@+id/progressBar"
-                android:progressDrawable="@drawable/progress_horizontal"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_height="6dp"
+                android:layout_marginTop="16dp"
                 android:max="4"
-                android:paddingStart="4dp"
-                android:paddingEnd="3.5dp" />
+                android:progressDrawable="@drawable/progress_horizontal" />
+
             <TextView
                 android:id="@+id/text_password_strength"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end" />
+                android:layout_gravity="end"
+                android:layout_marginTop="6dp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp" />
 
+            <!-- Show Password Checkbox -->
             <CheckBox
                 android:id="@+id/check_toggle_visibility"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="@string/show_password" />
+                android:layout_marginTop="12dp"
+                android:text="@string/show_password"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="14sp" />
 
         </LinearLayout>
 

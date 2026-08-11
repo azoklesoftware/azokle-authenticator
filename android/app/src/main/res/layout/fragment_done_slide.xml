@@ -2,39 +2,52 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="32dp">
+    android:paddingHorizontal="28dp"
+    android:paddingVertical="24dp">
 
+    <!-- Screen Title -->
     <TextView
         android:id="@+id/titleText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif-black"
         android:text="@string/setup_completed"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        android:layout_marginTop="30dp"
+        android:textColor="?attr/colorOnBackground"
+        android:textSize="32sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Hero App Logo -->
     <ImageView
-        android:layout_width="210dp"
-        android:layout_height="210dp"
-        android:layout_marginTop="60dp"
+        android:id="@+id/imgLogoDone"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:adjustViewBounds="true"
+        android:contentDescription="@string/setup_completed"
         android:src="@drawable/app_icon"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/descriptionDone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleText"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/setup_completed_description"
-        android:textAlignment="center"
-        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/titleText" />
+
+    <!-- Completion Description -->
+    <TextView
+        android:id="@+id/descriptionDone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:lineSpacingExtra="3dp"
+        android:text="@string/setup_completed_description"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

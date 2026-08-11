@@ -184,6 +184,9 @@ public class MainActivity extends AzokleAuthActivity implements EntryListView.Li
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
         ViewHelper.setupAppBarInsets(findViewById(R.id.app_bar_layout));
         _loaded = false;
         _isDPadPressed = false;
@@ -1005,9 +1008,6 @@ public class MainActivity extends AzokleAuthActivity implements EntryListView.Li
         int itemId = item.getItemId();
         if (itemId == R.id.action_settings) {
             startPreferencesActivity();
-        } else if (itemId == R.id.action_about) {
-            Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(intent);
         } else if (itemId == R.id.action_lock) {
             _vaultManager.lock(true);
         } else {
@@ -1438,6 +1438,15 @@ public class MainActivity extends AzokleAuthActivity implements EntryListView.Li
             _actionModeBackPressHandler.setEnabled(false);
             _selectedEntries.clear();
             _actionMode = null;
+        }
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        super.setTitle(title);
+        android.widget.TextView titleView = findViewById(R.id.toolbar_app_title);
+        if (titleView != null) {
+            titleView.setText(title);
         }
     }
 }
