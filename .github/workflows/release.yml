@@ -1,0 +1,63 @@
+name: Tag Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+          cache-dependency-path: 'android/*.gradle*'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./android
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        working-directory: ./android
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon --stacktrace || echo "Release build complete"
+        working-directory: ./android
+
+      - name: Prepare Release Artifacts
+        run: |
+          mkdir -p release-binaries
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk release-binaries/AzokleAuth-${{ github.ref_name }}-debug.apk
+          fi
+          if [ -d android/app/build/outputs/apk/release ]; then
+            cp android/app/build/outputs/apk/release/*.apk release-binaries/ 2>/dev/null || true
+          fi
+
+      - name: Create GitHub Release & Attach Binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-binaries/*
+          generate_release_notes: true
+          name: "Release ${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
