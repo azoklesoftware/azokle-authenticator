@@ -9,6 +9,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   lint-and-check:
     name: Lint & F-Droid Compliance Check
@@ -26,13 +29,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+          cache-dependency-path: 'android/*.gradle*'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: ./android
 
       - name: Run Android Lint Check
-        run: ./gradlew lint --stacktrace || echo "Lint check complete"
+        run: ./gradlew lint --no-daemon --stacktrace || echo "Lint check complete"
         working-directory: ./android
 
   build-debug:
@@ -51,13 +55,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+          cache-dependency-path: 'android/*.gradle*'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: ./android
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
         working-directory: ./android
 
       - name: Upload Debug APK Artifact
@@ -83,13 +88,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+          cache-dependency-path: 'android/*.gradle*'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: ./android
 
       - name: Build F-Droid Release APK
-        run: ./gradlew assembleRelease --stacktrace || echo "Release build step complete"
+        run: ./gradlew assembleRelease --no-daemon --stacktrace || echo "Release build step complete"
         working-directory: ./android
 
       - name: Upload Release Artifacts
@@ -104,6 +110,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [build-debug, build-f-droid-release]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Repository
@@ -115,10 +123,17 @@ jobs:
           name: AzokleAuth-Debug-APK
           path: release-artifacts/
 
-      - name: Create GitHub Release & Attach APK
+      - name: Download F-Droid Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: AzokleAuth-F-Droid-Release
+          path: release-artifacts/
+        continue-on-error: true
+
+      - name: Create GitHub Release & Attach Artifacts
         uses: softprops/action-gh-release@v2
         with:
-          files: release-artifacts/*
+          files: release-artifacts/**/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
