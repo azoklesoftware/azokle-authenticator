@@ -1,7 +1,7 @@
-# Crowdin Configuration File
 project_id: "372633"
+base_path: "."
 
 files:
-  - source: /android/app/src/main/res/values/strings.xml
-    translation: /android/app/src/main/res/values-%android_code%/%original_file_name%
-    dest: /strings.xml
+  - source: "android/app/src/main/res/values/strings.xml"
+    translation: "android/app/src/main/res/values-%android_code%/%original_file_name%"
+    dest: "strings.xml"

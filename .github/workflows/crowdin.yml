@@ -19,17 +19,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Synchronize Crowdin Source Strings
         uses: crowdin/github-action@v2
         with:
-          config: 'crowdin.yml'
-          token: ${{ secrets.CROWDIN_TOKEN }}
           upload_sources: true
           upload_translations: false
           download_translations: false
+          token: ${{ secrets.CROWDIN_TOKEN }}
+          config: 'crowdin.yml'
+        env:
+          CROWDIN_PROJECT_ID: "372633"
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_TOKEN }}
