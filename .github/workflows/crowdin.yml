@@ -1,31 +1,39 @@
-name: crowdin
+name: Crowdin Localization Sync
+
 on:
   push:
     branches:
+      - main
       - master
-# run sequentially (per branch)
+  workflow_dispatch:
+
 concurrency: "crowdin-upload-${{ github.ref }}"
+
 jobs:
   upload-sources:
+    name: Upload Strings to Crowdin
     runs-on: ubuntu-latest
     if: github.repository == 'azoklesoftware/azokle-authenticator'
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Install crowdin-cli
-        run: |
-          wget https://github.com/crowdin/crowdin-cli/releases/download/3.7.2/crowdin-cli.zip
-          echo "ee9f838b819ccedc33c9b2537055e5ba7d7934561b24df1e1a6274cbd6e27f2d  crowdin-cli.zip" | sha256sum -c
-          unzip crowdin-cli.zip -d crowdin-cli
-      - name: Upload to Crowdin
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Synchronize Crowdin Source Strings
+        uses: crowdin/github-action@v2
+        with:
+          upload_sources: true
+          upload_translations: false
+          download_translations: false
+          source: android/app/src/main/res/values/strings.xml
+          translation: android/app/src/main/res/values-%android_code%/%original_file_name%
+          project_id: "372633"
         env:
-          CROWDIN_TOKEN: "${{ secrets.CROWDIN_TOKEN }}"
-        run: |
-          java -jar ./crowdin-cli/3.7.2/crowdin-cli.jar upload sources \
-            --no-progress \
-            --token "$CROWDIN_TOKEN" \
-            --project-id 372633 \
-            --base-path app/src/main \
-            --source res/values/strings.xml \
-            --translation "res/values-%android_code%/%original_file_name%" \
-            --dest strings.xml \
-            --branch master
+          CROWDIN_PROJECT_ID: "372633"
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_TOKEN }}
