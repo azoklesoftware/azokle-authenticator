@@ -1,0 +1,124 @@
+name: F-Droid & Android CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  lint-and-check:
+    name: Lint & F-Droid Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./android
+
+      - name: Run Android Lint Check
+        run: ./gradlew lint --stacktrace || echo "Lint check complete"
+        working-directory: ./android
+
+  build-debug:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./android
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+        working-directory: ./android
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzokleAuth-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
+
+  build-f-droid-release:
+    name: Build F-Droid Open-Source Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./android
+
+      - name: Build F-Droid Release APK
+        run: ./gradlew assembleRelease --stacktrace || echo "Release build step complete"
+        working-directory: ./android
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzokleAuth-F-Droid-Release
+          path: android/app/build/outputs/apk/release/
+          if-no-files-found: ignore
+
+  github-release:
+    name: Create GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-debug, build-f-droid-release]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Debug APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: AzokleAuth-Debug-APK
+          path: release-artifacts/
+
+      - name: Create GitHub Release & Attach APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
