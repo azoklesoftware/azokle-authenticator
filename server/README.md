@@ -1,8 +1,13 @@
 # 🛡️ Azokle Auth - Sync Server
 
+[![Status](https://img.shields.io/badge/Status-Under%20Active%20Development-yellow.svg)](#)
 [![Rust](https://img.shields.io/badge/Language-Rust-orange.svg)](https://www.rust-lang.org/)
 [![Security](https://img.shields.io/badge/Security-E2EE%20Zero--Knowledge-blue.svg)](#-security--privacy-architecture)
 [![License](https://img.shields.io/badge/License-GPLv3-green.svg)](../LICENSE)
+
+> [!WARNING]
+> **🚧 UNDER ACTIVE DEVELOPMENT 🚧**  
+> The Azokle Auth Sync Server is currently under active pre-release development. Features, schemas, and API endpoints are subject to change.
 
 The **Azokle Auth Sync Server** provides high-speed, reliable, **End-to-End Encrypted (E2EE)** synchronization across multiple devices. 
 
