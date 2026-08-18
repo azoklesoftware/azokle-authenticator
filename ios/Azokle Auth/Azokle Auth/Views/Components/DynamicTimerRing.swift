@@ -22,7 +22,7 @@ public struct DynamicTimerRing: View {
 
     public var body: some View {
         let isCritical = progress.remainingSeconds <= 5
-        let ringColor = Theme.timerColor(remainingSeconds: progress.remainingSeconds, totalPeriod: progress.period)
+        let ringColor = Theme.timerColor(remainingSeconds: progress.remainingSeconds, totalPeriod: progress.totalPeriod)
 
         ZStack {
             // Background track
@@ -32,14 +32,14 @@ public struct DynamicTimerRing: View {
 
             // Progress Arc
             Circle()
-                .trim(from: 0.0, to: CGFloat(max(0.001, min(1.0, progress.progressRatio))))
+                .trim(from: 0.0, to: CGFloat(max(0.001, min(1.0, progress.progress))))
                 .stroke(
                     ringColor,
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
                 .frame(width: size, height: size)
-                .animation(.linear(duration: 0.5), value: progress.progressRatio)
+                .animation(.linear(duration: 0.5), value: progress.progress)
                 .scaleEffect(isCritical ? 1.06 : 1.0)
                 .animation(isCritical ? .easeInOut(duration: 0.5).repeatForever(autoreverses: true) : .default, value: isCritical)
 
@@ -63,7 +63,7 @@ public struct DynamicTimerBar: View {
     }
 
     public var body: some View {
-        let ringColor = Theme.timerColor(remainingSeconds: progress.remainingSeconds, totalPeriod: progress.period)
+        let ringColor = Theme.timerColor(remainingSeconds: progress.remainingSeconds, totalPeriod: progress.totalPeriod)
 
         GeometryReader { geo in
             ZStack(alignment: .leading) {
@@ -73,8 +73,8 @@ public struct DynamicTimerBar: View {
 
                 RoundedRectangle(cornerRadius: height / 2)
                     .fill(ringColor)
-                    .frame(width: max(0, geo.size.width * CGFloat(progress.progressRatio)), height: height)
-                    .animation(.linear(duration: 0.5), value: progress.progressRatio)
+                    .frame(width: max(0, geo.size.width * CGFloat(progress.progress)), height: height)
+                    .animation(.linear(duration: 0.5), value: progress.progress)
             }
         }
         .frame(height: height)

@@ -29,6 +29,7 @@ public struct EditEntryView: View {
     @State private var errorMessage: String?
     @State private var showingIconPicker = false
     @State private var customIcon: String?
+    @State private var showAdvanced = false
 
     public init(entry: VaultEntry? = nil, onSave: @escaping (VaultEntry) -> Void) {
         self.existingEntry = entry
