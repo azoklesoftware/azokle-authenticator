@@ -27,9 +27,9 @@ public enum VaultRepositoryError: Error, LocalizedError {
 public final class VaultRepository {
     public static let fileName = "azokle_auth.json"
 
-    private(set) var database: VaultDatabase
-    private(set) var masterKey: SymmetricKey
-    private(set) var slots: [Slot]
+    public private(set) var database: VaultDatabase
+    public private(set) var masterKey: SymmetricKey
+    public private(set) var slots: [Slot]
 
     public init(database: VaultDatabase, masterKey: SymmetricKey, slots: [Slot]) {
         self.database = database

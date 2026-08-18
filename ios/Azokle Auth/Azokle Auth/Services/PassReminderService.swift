@@ -62,15 +62,34 @@ public final class PassReminderService: ObservableObject {
     }
 
     public func verify(password: String) -> Bool {
-        guard let vault = VaultManager.shared.repository?.vaultFile else { return false }
+        if let slots = VaultManager.shared.repository?.slots {
+            let passSlots = slots.compactMap { $0 as? PasswordSlot }
+            if let targetSlot = passSlots.first(where: { !$0.isBackup }) ?? passSlots.first {
+                do {
+                    _ = try targetSlot.unlockMasterKey(password: password)
+                    recordSuccess()
+                    return true
+                } catch {
+                    return false
+                }
+            }
+        }
 
-        // Find a PasswordSlot in the vault header
-        guard let passwordSlot = vault.header.slots.first(where: { $0.type == .password }) else {
+        // Fallback: Read vault file header directly from disk
+        guard VaultRepository.vaultExists,
+              let fileData = try? Data(contentsOf: VaultRepository.vaultFileURL),
+              let vaultFile = try? JSONDecoder().decode(VaultFile.self, from: fileData),
+              let anySlots = vaultFile.header.slots else {
+            return false
+        }
+
+        let passwordSlots = anySlots.compactMap { $0.slot as? PasswordSlot }
+        guard let passwordSlot = passwordSlots.first(where: { !$0.isBackup }) ?? passwordSlots.first else {
             return false
         }
 
         do {
-            _ = try passwordSlot.unlock(credential: password)
+            _ = try passwordSlot.unlockMasterKey(password: password)
             recordSuccess()
             return true
         } catch {
