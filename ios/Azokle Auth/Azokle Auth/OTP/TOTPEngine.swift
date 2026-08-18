@@ -13,6 +13,9 @@ public struct TOTPProgress {
     public let remainingSeconds: Int
     public let totalPeriod: Int
 
+    public var period: Int { totalPeriod }
+    public var progressRatio: Double { progress }
+
     public init(code: String, progress: Double, remainingSeconds: Int, totalPeriod: Int) {
         self.code = code
         self.progress = progress
