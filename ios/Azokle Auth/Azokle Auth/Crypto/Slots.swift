@@ -14,7 +14,7 @@ public enum SlotType: Int, Codable {
     case biometric = 2
 }
 
-public class Slot: Identifiable, Codable {
+public class Slot: Identifiable, Codable, @unchecked Sendable {
     public let uuid: UUID
     public let type: SlotType
     public var key: String // Hex encoded ciphertext of master key
@@ -53,7 +53,7 @@ public class Slot: Identifiable, Codable {
 }
 
 // MARK: - PasswordSlot
-public final class PasswordSlot: Slot {
+public final class PasswordSlot: Slot, @unchecked Sendable {
     public var scryptParams: SCryptParameters
     public var isRepaired: Bool
     public var isBackup: Bool
@@ -119,7 +119,7 @@ public final class PasswordSlot: Slot {
     }
 
     /// Creates a new PasswordSlot wrapping the given MasterKey
-    public static func create(masterKey: SymmetricKey, password: String, isBackup: Bool = false) throws -> PasswordSlot {
+    public nonisolated static func create(masterKey: SymmetricKey, password: String, isBackup: Bool = false) throws -> PasswordSlot {
         let salt = CryptoUtils.generateSalt()
         let scryptParams = SCryptParameters(n: 32768, r: 8, p: 1, saltData: salt)
         let derivedKeyData = try SCrypt.generate(password: password, params: scryptParams)
@@ -139,7 +139,7 @@ public final class PasswordSlot: Slot {
 }
 
 // MARK: - BiometricSlot
-public final class BiometricSlot: Slot {
+public final class BiometricSlot: Slot, @unchecked Sendable {
     public init(uuid: UUID = UUID(), key: String, keyParams: CryptParameters) {
         super.init(uuid: uuid, type: .biometric, key: key, keyParams: keyParams)
     }

@@ -537,11 +537,16 @@ private struct AuditLogView: View {
 }
 
 // MARK: - Share Sheet Helper
-private struct ShareSheet: UIViewControllerRepresentable {
-    let activityItems: [Any]
-    var onDismiss: (() -> Void)?
+public struct ShareSheet: UIViewControllerRepresentable {
+    public let activityItems: [Any]
+    public var onDismiss: (() -> Void)?
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
+    public init(activityItems: [Any], onDismiss: (() -> Void)? = nil) {
+        self.activityItems = activityItems
+        self.onDismiss = onDismiss
+    }
+
+    public func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
         controller.completionWithItemsHandler = { _, _, _, _ in
             onDismiss?()
@@ -549,7 +554,7 @@ private struct ShareSheet: UIViewControllerRepresentable {
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+    public func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 private func TemporaryExportFile(data: Data, filename: String) -> URL {

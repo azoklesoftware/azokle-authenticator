@@ -24,7 +24,7 @@ public enum VaultRepositoryError: Error, LocalizedError {
     }
 }
 
-public final class VaultRepository {
+public final class VaultRepository: @unchecked Sendable {
     public static let fileName = "azokle_auth.json"
 
     public private(set) var database: VaultDatabase

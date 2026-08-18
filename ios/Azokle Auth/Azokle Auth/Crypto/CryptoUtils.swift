@@ -61,13 +61,13 @@ public struct CryptResult {
     }
 }
 
-public final class CryptoUtils {
+public enum CryptoUtils: Sendable {
     public static let keySize = 32 // 256-bit AES
     public static let tagSize = 16 // 128-bit tag
     public static let nonceSize = 12 // 96-bit GCM nonce
 
     /// Generates secure random bytes using system CSPRNG
-    public static func generateRandomBytes(count: Int) -> Data {
+    public nonisolated static func generateRandomBytes(count: Int) -> Data {
         var bytes = [UInt8](repeating: 0, count: count)
         let status = SecRandomCopyBytes(kSecRandomDefault, count, &bytes)
         guard status == errSecSuccess else {
@@ -77,17 +77,17 @@ public final class CryptoUtils {
     }
 
     /// Generates a random 256-bit AES master key
-    public static func generateMasterKey() -> SymmetricKey {
+    public nonisolated static func generateMasterKey() -> SymmetricKey {
         return SymmetricKey(size: .bits256)
     }
 
     /// Generates a random 256-bit salt for scrypt
-    public static func generateSalt() -> Data {
+    public nonisolated static func generateSalt() -> Data {
         return generateRandomBytes(count: keySize)
     }
 
     /// Encrypts data using AES-256-GCM
-    public static func encrypt(data: Data, key: SymmetricKey) throws -> CryptResult {
+    public nonisolated static func encrypt(data: Data, key: SymmetricKey) throws -> CryptResult {
         let nonceData = generateRandomBytes(count: nonceSize)
         let nonce = try AES.GCM.Nonce(data: nonceData)
 
@@ -100,7 +100,7 @@ public final class CryptoUtils {
     }
 
     /// Decrypts data using AES-256-GCM
-    public static func decrypt(ciphertext: Data, key: SymmetricKey, params: CryptParameters) throws -> Data {
+    public nonisolated static func decrypt(ciphertext: Data, key: SymmetricKey, params: CryptParameters) throws -> Data {
         guard let nonceData = params.nonceData, let tagData = params.tagData else {
             throw CryptoError.invalidData
         }

@@ -33,10 +33,10 @@ public struct SCryptParameters: Codable, Equatable {
     }
 }
 
-public final class SCrypt {
+public enum SCrypt: Sendable {
 
     /// Derives a key using the scrypt algorithm (RFC 7914)
-    public static func generate(password: Data, salt: Data, n: Int = 32768, r: Int = 8, p: Int = 1, dkLen: Int = 32) throws -> Data {
+    public nonisolated static func generate(password: Data, salt: Data, n: Int = 32768, r: Int = 8, p: Int = 1, dkLen: Int = 32) throws -> Data {
         guard n > 1 && (n & (n - 1)) == 0 else {
             throw CryptoError.invalidData
         }
@@ -48,19 +48,20 @@ public final class SCrypt {
         let blockSize = 128 * r
         var B = try pbkdf2HmacSha256(password: password, salt: salt, iterations: 1, keyLength: p * blockSize)
 
-        // 2. ROMix for each chunk of size 128*r
+        // 2. ROMix for each chunk B_i
         for i in 0..<p {
             let offset = i * blockSize
             let chunk = B.subdata(in: offset..<(offset + blockSize))
-            let mixedChunk = roMix(block: chunk, n: n, r: r)
-            B.replaceSubrange(offset..<(offset + blockSize), with: mixedChunk)
+            let mixed = roMix(block: chunk, n: n, r: r)
+            B.replaceSubrange(offset..<(offset + blockSize), with: mixed)
         }
 
-        // 3. Final PBKDF2 expansion: PBKDF2-HMAC-SHA256(P, B, 1, dkLen)
+        // 3. Final PBKDF2: DK = PBKDF2-HMAC-SHA256(P, B, 1, dkLen)
         return try pbkdf2HmacSha256(password: password, salt: B, iterations: 1, keyLength: dkLen)
     }
 
-    public static func generate(password: String, params: SCryptParameters, dkLen: Int = 32) throws -> Data {
+    /// Convenience helper for deriving a key from String password and SCryptParameters
+    public nonisolated static func generate(password: String, params: SCryptParameters, dkLen: Int = 32) throws -> Data {
         guard let saltData = params.saltData, let passData = password.data(using: .utf8) else {
             throw CryptoError.invalidData
         }
