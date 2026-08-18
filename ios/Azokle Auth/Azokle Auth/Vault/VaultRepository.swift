@@ -56,6 +56,10 @@ public final class VaultRepository {
         }
     }
 
+    public var rawFileData: Data? {
+        return try? Data(contentsOf: Self.vaultFileURL)
+    }
+
     // MARK: - Save Vault Atomically
     public func save() throws {
         var vaultFile = VaultFile()

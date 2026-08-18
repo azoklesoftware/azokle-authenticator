@@ -23,6 +23,10 @@ public struct SettingsView: View {
     @State private var exportFilename: String = ""
     @State private var showingWipeAlert = false
     @State private var statusMessage: String?
+    @State private var showingImportPasswordPrompt = false
+    @State private var pendingImportData: Data?
+    @State private var pendingImportFilename: String = ""
+    @State private var importPasswordInput = ""
 
     public init() {}
 
@@ -280,6 +284,13 @@ public struct SettingsView: View {
             )) {
                 Button("OK") { statusMessage = nil }
             }
+            .alert("Encrypted Backup Password", isPresented: $showingImportPasswordPrompt) {
+                SecureField("Enter Password", text: $importPasswordInput)
+                Button("Import") { handleImportWithPassword() }
+                Button("Cancel", role: .cancel) { pendingImportData = nil }
+            } message: {
+                Text("This file is encrypted. Please enter the backup password to decrypt and import its 2FA tokens.")
+            }
         }
     }
 
@@ -308,21 +319,45 @@ public struct SettingsView: View {
 
             do {
                 let data = try Data(contentsOf: url)
-                let imported = try UniversalImporter.parse(data: data, fileName: url.lastPathComponent)
-                for entry in imported.entries {
-                    try vaultManager.repository?.addEntry(entry)
+                do {
+                    let imported = try UniversalImporter.parse(data: data, fileName: url.lastPathComponent)
+                    applyImportedTokens(imported)
+                } catch {
+                    // Try with password prompt
+                    self.pendingImportData = data
+                    self.pendingImportFilename = url.lastPathComponent
+                    self.importPasswordInput = ""
+                    self.showingImportPasswordPrompt = true
                 }
-                for group in imported.groups {
-                    _ = try? vaultManager.repository?.addGroup(name: group.name)
-                }
-                vaultManager.syncEntries()
-                statusMessage = "Successfully imported \(imported.entries.count) tokens from \(imported.sourceName)!"
             } catch {
                 statusMessage = "Import failed: \(error.localizedDescription)"
             }
         case .failure(let error):
             statusMessage = "Import error: \(error.localizedDescription)"
         }
+    }
+
+    private func handleImportWithPassword() {
+        guard let data = pendingImportData else { return }
+        do {
+            let password = importPasswordInput.isEmpty ? nil : importPasswordInput
+            let imported = try UniversalImporter.parse(data: data, fileName: pendingImportFilename, password: password)
+            applyImportedTokens(imported)
+            pendingImportData = nil
+        } catch {
+            statusMessage = "Import failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func applyImportedTokens(_ imported: ImportedVaultResult) {
+        for entry in imported.entries {
+            try? vaultManager.repository?.addEntry(entry)
+        }
+        for group in imported.groups {
+            _ = try? vaultManager.repository?.addGroup(name: group.name)
+        }
+        vaultManager.syncEntries()
+        statusMessage = "Successfully imported \(imported.entries.count) tokens from \(imported.sourceName)!"
     }
 }
 

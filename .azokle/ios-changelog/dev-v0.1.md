@@ -37,9 +37,15 @@ Version 0.1.0-dev marks the complete ground-up native implementation of **Azokle
 * **VULN-04 (Export Memory Protection):** Added `.completeFileProtection` and auto-cleanup of temporary plaintext export files.
 * **VULN-05 (Protobuf Base64 Padding):** Implemented URL-safe character normalization (`-` $\to$ `+`, `_` $\to$ `/`) and padding completion in migration parsers.
 * **VULN-06 (Atomic Vault Writes):** Configured `.completeFileProtection` on all atomic vault file saves.
-* **VULN-07 (Camera Permissions):** Built permission-denied detection and settings deep-link fallback in QR scanner.
-* **VULN-08 (App Switcher Shield & Auto-Lock):** Recorded `backgroundTimestamp` across `.inactive` and `.background` scene phase transitions and masked sensitive UI in App Switcher.
 * **VULN-09 (scrypt Performance):** Flattened ROMix table into contiguous memory buffers.
+* **BUG-01 (Repository File Access):** Exposed `rawFileData` on `VaultRepository` for automated snapshot backups.
+* **BUG-02 (Audit Signature Alignment):** Aligned `AutoBackupService` with `AuditLogService.record(_:reference:)`.
+* **BUG-03 (Toolbar Hierarchy):** Corrected `.sheet` modifier nesting on `EditEntryView`.
+* **BUG-04 (Main Thread Async scrypt):** Offloaded `createVault` and `unlock` scrypt derivation to `Task.detached` background workers.
+* **BUG-05 (CIContext Static Caching):** Eliminated continuous GPU context churn in `TransferView`.
+* **BUG-06 (Scanner Frame Throttle):** Added `isProcessingScan` debounce guard to prevent 60fps frame flood duplicate imports.
+* **BUG-07 (CopyBehavior Preference):** Added conditional branch logic in `EntryCardView.handleCardTap` honoring `CopyBehavior`.
+* **BUG-08 (Encrypted File Import Sheet):** Added password entry alert modal for encrypted third-party vault backups.
 
 ---
 

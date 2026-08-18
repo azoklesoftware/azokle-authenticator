@@ -179,8 +179,9 @@ public struct TransferView: View {
         self.qrFrames = frames.isEmpty ? ["otpauth://totp/Azokle:Demo?secret=JBSWY3DPEHPK3PXP"] : frames
     }
 
+    private static let ciContext = CIContext()
+
     private func generateQRCode(from string: String) -> UIImage? {
-        let context = CIContext()
         let filter = CIFilter.qrCodeGenerator()
         filter.setValue(Data(string.utf8), forKey: "inputMessage")
         filter.setValue("M", forKey: "inputCorrectionLevel")
@@ -188,7 +189,7 @@ public struct TransferView: View {
         guard let outputImage = filter.outputImage else { return nil }
         let scaledImage = outputImage.transformed(by: CGAffineTransform(scaleX: 10, y: 10))
 
-        if let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) {
+        if let cgImage = Self.ciContext.createCGImage(scaledImage, from: scaledImage.extent) {
             return UIImage(cgImage: cgImage)
         }
         return nil

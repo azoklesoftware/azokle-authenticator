@@ -17,6 +17,7 @@ public struct ScannerView: View {
     @StateObject private var scannerModel = CameraScannerModel()
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var scanErrorMessage: String?
+    @State private var isProcessingScan = false
 
     public init(onScanSuccess: @escaping ([VaultEntry]) -> Void) {
         self.onScanSuccess = onScanSuccess
@@ -154,6 +155,7 @@ public struct ScannerView: View {
                 }
             }
             .onAppear {
+                isProcessingScan = false
                 scannerModel.onCodeScanned = handleScannedString
                 scannerModel.start()
             }
@@ -167,18 +169,21 @@ public struct ScannerView: View {
     }
 
     private func handleScannedString(_ string: String) {
+        guard !isProcessingScan else { return }
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // 1. Check if Google Authenticator Migration URI
         if trimmed.hasPrefix("otpauth-migration://"), let url = URL(string: trimmed) {
             if let migration = GoogleAuthMigrationParser.parse(url: url) {
+                isProcessingScan = true
+                scannerModel.stop()
                 var entries: [VaultEntry] = []
                 for item in migration.entries {
                     let secretB32 = Base32.encode(item.secret)
                     let info = OtpInfoModel(secret: secretB32, algo: item.algorithm, digits: item.digits, period: 30, counter: item.counter)
                     entries.append(VaultEntry(type: item.type, name: item.name, issuer: item.issuer, info: info))
                 }
-                scannerModel.stop()
+                Theme.triggerNotificationHaptic(type: .success)
                 onScanSuccess(entries)
                 dismiss()
                 return
@@ -187,7 +192,9 @@ public struct ScannerView: View {
 
         // 2. Check if standard otpauth:// URI
         if let entry = UniversalImporter.parseSingleOtpauthURI(uriString: trimmed) {
+            isProcessingScan = true
             scannerModel.stop()
+            Theme.triggerNotificationHaptic(type: .success)
             onScanSuccess([entry])
             dismiss()
             return

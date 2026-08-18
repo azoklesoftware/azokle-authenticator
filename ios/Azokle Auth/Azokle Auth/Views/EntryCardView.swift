@@ -390,7 +390,22 @@ public struct EntryCardView: View {
             return
         }
 
-        handleCopy()
+        switch prefs.copyBehavior {
+        case .singleTap:
+            handleCopy()
+        case .doubleTap, .tapToRevealOnly:
+            if !isRevealed {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    isRevealed = true
+                }
+                Theme.triggerHaptic(style: .light)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+                    withAnimation { isRevealed = false }
+                }
+            } else if prefs.copyBehavior == .doubleTap {
+                handleCopy()
+            }
+        }
     }
 
     private func handleCopy() {

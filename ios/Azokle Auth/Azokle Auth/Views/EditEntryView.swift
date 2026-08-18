@@ -215,6 +215,7 @@ public struct EditEntryView: View {
                         .fontWeight(.bold)
                         .foregroundColor(Theme.accentCyan)
                 }
+            }
             .sheet(isPresented: $showingIconPicker) {
                 IconPickerSheet(
                     issuer: issuer,

@@ -88,7 +88,7 @@ public final class AutoBackupService: ObservableObject {
             try vaultData.write(to: targetURL, options: [.atomic, .completeFileProtection])
             pruneSnapshots(retentionLimit: retentionLimit)
             reloadSnapshots()
-            AuditLogService.shared.log(type: .vaultBackupCreated, reference: filename)
+            AuditLogService.shared.record(.vaultBackupCreated, reference: filename)
         } catch {
             print("Failed to write auto-backup snapshot: \(error)")
         }

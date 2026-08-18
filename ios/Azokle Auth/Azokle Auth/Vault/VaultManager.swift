@@ -55,13 +55,16 @@ public final class VaultManager: ObservableObject {
     }
 
     // MARK: - Initial Vault Setup
-    public func createVault(password: String) throws {
-        let masterKey = CryptoUtils.generateMasterKey()
-        let passwordSlot = try PasswordSlot.create(masterKey: masterKey, password: password, isBackup: false)
-        let initialDatabase = VaultDatabase(version: 1, entries: [], groups: [])
+    public func createVault(password: String) async throws {
+        let repo = try await Task.detached(priority: .userInitiated) {
+            let masterKey = CryptoUtils.generateMasterKey()
+            let passwordSlot = try PasswordSlot.create(masterKey: masterKey, password: password, isBackup: false)
+            let initialDatabase = VaultDatabase(version: 1, entries: [], groups: [])
 
-        let repo = VaultRepository(database: initialDatabase, masterKey: masterKey, slots: [passwordSlot])
-        try repo.save()
+            let repo = VaultRepository(database: initialDatabase, masterKey: masterKey, slots: [passwordSlot])
+            try repo.save()
+            return repo
+        }.value
 
         self.repository = repo
         self.entries = repo.entries
@@ -74,43 +77,51 @@ public final class VaultManager: ObservableObject {
     }
 
     // MARK: - Unlock with Password
-    public func unlock(password: String) throws {
+    public func unlock(password: String) async throws {
         guard VaultRepository.vaultExists else {
             throw VaultRepositoryError.vaultFileNotFound
         }
 
-        let fileData = try Data(contentsOf: VaultRepository.vaultFileURL)
-        let vaultFile = try JSONDecoder().decode(VaultFile.self, from: fileData)
+        let repo: VaultRepository
+        do {
+            repo = try await Task.detached(priority: .userInitiated) {
+                let fileData = try Data(contentsOf: VaultRepository.vaultFileURL)
+                let vaultFile = try JSONDecoder().decode(VaultFile.self, from: fileData)
 
-        guard let anySlots = vaultFile.header.slots, !anySlots.isEmpty else {
-            throw CryptoError.decryptionFailed
-        }
-
-        var decryptedMasterKey: SymmetricKey?
-
-        // Attempt each password slot (primary or backup)
-        for anySlot in anySlots {
-            if let passwordSlot = anySlot.slot as? PasswordSlot {
-                do {
-                    let masterKey = try passwordSlot.unlockMasterKey(password: password)
-                    decryptedMasterKey = masterKey
-                    break
-                } catch {
-                    // Try next slot
-                    continue
+                guard let anySlots = vaultFile.header.slots, !anySlots.isEmpty else {
+                    throw CryptoError.decryptionFailed
                 }
-            }
-        }
 
-        guard let masterKey = decryptedMasterKey else {
+                var decryptedMasterKey: SymmetricKey?
+
+                // Attempt each password slot (primary or backup)
+                for anySlot in anySlots {
+                    if let passwordSlot = anySlot.slot as? PasswordSlot {
+                        do {
+                            let masterKey = try passwordSlot.unlockMasterKey(password: password)
+                            decryptedMasterKey = masterKey
+                            break
+                        } catch {
+                            // Try next slot
+                            continue
+                        }
+                    }
+                }
+
+                guard let masterKey = decryptedMasterKey else {
+                    throw CryptoError.decryptionFailed
+                }
+
+                let database = try vaultFile.getDatabase(using: masterKey)
+                let slots = anySlots.map { $0.slot }
+
+                return VaultRepository(database: database, masterKey: masterKey, slots: slots)
+            }.value
+        } catch {
             AuditLogService.shared.record(.failedPassword)
-            throw CryptoError.decryptionFailed
+            throw error
         }
 
-        let database = try vaultFile.getDatabase(using: masterKey)
-        let slots = anySlots.map { $0.slot }
-
-        let repo = VaultRepository(database: database, masterKey: masterKey, slots: slots)
         self.repository = repo
         self.entries = repo.entries
         self.groups = repo.groups

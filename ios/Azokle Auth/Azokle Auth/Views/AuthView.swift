@@ -203,7 +203,7 @@ public struct AuthView: View {
 
         Task {
             do {
-                try vaultManager.createVault(password: password)
+                try await vaultManager.createVault(password: password)
                 isLoading = false
             } catch {
                 isLoading = false
@@ -219,7 +219,7 @@ public struct AuthView: View {
 
         Task {
             do {
-                try vaultManager.unlock(password: password)
+                try await vaultManager.unlock(password: password)
                 isLoading = false
             } catch {
                 isLoading = false
