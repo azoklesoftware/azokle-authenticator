@@ -191,6 +191,67 @@ public struct VaultEntry: Identifiable, Codable, Equatable {
             )
         }
     }
+
+    /// Computes the next period's OTP code for preview or quick-copy
+    public func nextCode(timestamp: TimeInterval = Date().timeIntervalSince1970) -> String? {
+        guard type == .totp || type == .steam else { return nil }
+        let nextTimestamp = timestamp + Double(info.period)
+        if type == .totp {
+            return TOTPEngine.generateCode(
+                secret: info.secretData,
+                algorithm: info.algo,
+                digits: info.digits,
+                period: info.period,
+                timestamp: nextTimestamp
+            )
+        } else if type == .steam {
+            return SteamEngine.generateCode(secret: info.secretData, timestamp: nextTimestamp)
+        }
+        return nil
+    }
+
+    /// Generates standard otpauth:// URI representation
+    public var otpauthUri: String {
+        let typeStr = type.rawValue
+        let label: String
+        if !issuer.isEmpty && !name.isEmpty {
+            label = "\(issuer):\(name)"
+        } else if !issuer.isEmpty {
+            label = issuer
+        } else {
+            label = name
+        }
+
+        let encodedLabel = label.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? label
+        var urlString = "otpauth://\(typeStr)/\(encodedLabel)?secret=\(info.secret)"
+
+        if !issuer.isEmpty {
+            let encodedIssuer = issuer.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? issuer
+            urlString += "&issuer=\(encodedIssuer)"
+        }
+
+        if info.algo != .sha1 {
+            urlString += "&algorithm=\(info.algo.rawValue)"
+        }
+
+        if info.digits != 6 {
+            urlString += "&digits=\(info.digits)"
+        }
+
+        if type == .totp && info.period != 30 {
+            urlString += "&period=\(info.period)"
+        }
+
+        if type == .hotp {
+            urlString += "&counter=\(info.counter)"
+        }
+
+        if let pin = info.pin, !pin.isEmpty {
+            urlString += "&pin=\(pin)"
+        }
+
+        return urlString
+    }
 }
 
 // MARK: - Vault Group
