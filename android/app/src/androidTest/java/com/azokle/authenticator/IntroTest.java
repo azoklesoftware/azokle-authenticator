@@ -87,11 +87,11 @@ public class IntroTest extends AzokleAuthTest {
         ViewInteraction prev = onView(withId(R.id.btnPrevious));
 
         prev.check(matches(not(isDisplayed())));
-        next.perform(click());
+        onView(withId(R.id.btnCreateVault)).perform(click());
         onView(withId(R.id.rb_none)).perform(click());
         prev.perform(click());
         prev.check(matches(not(isDisplayed())));
-        next.perform(click());
+        onView(withId(R.id.btnCreateVault)).perform(click());
         next.perform(click());
         prev.check(matches(not(isDisplayed())));
         next.perform(click());
@@ -109,11 +109,11 @@ public class IntroTest extends AzokleAuthTest {
         ViewInteraction prev = onView(withId(R.id.btnPrevious));
 
         prev.check(matches(not(isDisplayed())));
-        next.perform(click());
+        onView(withId(R.id.btnCreateVault)).perform(click());
         onView(withId(R.id.rb_password)).perform(click());
         prev.perform(click());
         prev.check(matches(not(isDisplayed())));
-        next.perform(click());
+        onView(withId(R.id.btnCreateVault)).perform(click());
         next.perform(click());
         onView(withId(R.id.text_password)).perform(typeText(VAULT_PASSWORD), closeSoftKeyboard());
         onView(withId(R.id.text_password_confirm)).perform(typeText(VAULT_PASSWORD + "1"), closeSoftKeyboard());
@@ -122,7 +122,7 @@ public class IntroTest extends AzokleAuthTest {
         prev.perform(click());
         prev.perform(click());
         prev.check(matches(not(isDisplayed())));
-        next.perform(click());
+        onView(withId(R.id.btnCreateVault)).perform(click());
         next.perform(click());
         next.perform(click());
         next.perform(click());

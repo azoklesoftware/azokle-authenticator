@@ -71,8 +71,8 @@ public class OverallTest extends AzokleAuthTest {
 
     @Test
     public void testOverall() {
+        onView(withId(R.id.btnCreateVault)).perform(click());
         ViewInteraction next = onView(withId(R.id.btnNext));
-        next.perform(click());
         onView(withId(R.id.rb_password)).perform(click());
         next.perform(click());
         onView(withId(R.id.text_password)).perform(click()).perform(typeText(VAULT_PASSWORD), closeSoftKeyboard());

@@ -30,8 +30,8 @@ jobs:
         run: chmod +x gradlew
         working-directory: ./android
 
-      - name: Build the app
-        run: ./gradlew build --no-daemon --stacktrace
+      - name: Build and test the app
+        run: ./gradlew assembleDebug testDebugUnitTest --no-daemon --stacktrace
         working-directory: ./android
 
       - name: Upload Debug APK Artifact

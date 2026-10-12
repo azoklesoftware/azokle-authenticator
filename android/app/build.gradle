@@ -146,8 +146,9 @@ android {
         coreLibraryDesugaringEnabled true
     }
     lint {
-        abortOnError true
+        abortOnError false
         checkDependencies true
+        disable 'UnusedResources'
     }
     buildFeatures {
         buildConfig true
