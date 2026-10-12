@@ -67,7 +67,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Trivy Scanner on Android
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: 'fs'
           scan-ref: './android'
@@ -85,7 +85,7 @@ jobs:
           category: 'trivy-android-sca'
 
       - name: Generate Trivy Table Summary
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: 'fs'
           scan-ref: './android'
