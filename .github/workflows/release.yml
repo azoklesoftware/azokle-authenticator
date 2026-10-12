@@ -6,19 +6,25 @@ on:
       - 'v*'
       - '[0-9]*'
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Publish release assets to GitHub Releases (only valid on tag refs)'
+        required: true
+        type: boolean
+        default: false
 
+# Top-level permissions default to read-only for least privilege
 permissions:
-  contents: write
-
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+  contents: read
 
 jobs:
-  build-and-release:
-    name: Build & Publish Release
+  build-and-sign:
+    name: Build & Sign Android Release
     runs-on: ubuntu-latest
+    # Restrict access to release secrets via GitHub Environment protection rules
+    environment: release
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout Repository
@@ -38,27 +44,150 @@ jobs:
         run: chmod +x gradlew
         working-directory: ./android
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-        working-directory: ./android
+      - name: Enforce Mandatory Release Signing Secrets
+        run: |
+          echo "=== Validating Required Signing Secrets ==="
+          missing=()
+          [ -z "$KEYSTORE_B64" ] && missing+=("ANDROID_KEYSTORE_BASE64")
+          [ -z "$KEYSTORE_PWD" ] && missing+=("ANDROID_KEYSTORE_PASSWORD")
+          [ -z "$KEY_ALIAS" ] && missing+=("ANDROID_KEY_ALIAS")
+          [ -z "$KEY_PWD" ] && missing+=("ANDROID_KEY_PASSWORD")
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon --stacktrace || echo "Release build complete"
-        working-directory: ./android
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Release signing is mandatory. Missing required repository secret(s): ${missing[*]}"
+            exit 1
+          fi
+          echo " All required signing secrets are present."
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PWD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PWD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Prepare Release Artifacts
+      - name: Securely Decode Keystore to Memory-Backed Storage (tmpfs)
+        run: |
+          # Use /dev/shm (POSIX shared memory / tmpfs) so the private keystore
+          # lives strictly in volatile RAM and is never written to disk or storage journals.
+          KEYSTORE_DIR="/dev/shm/keystore_$$"
+          mkdir -m 700 -p "$KEYSTORE_DIR"
+          KEYSTORE_FILE="$KEYSTORE_DIR/release.jks"
+
+          (umask 077 && echo "$KEYSTORE_B64" | base64 --decode > "$KEYSTORE_FILE")
+          chmod 400 "$KEYSTORE_FILE"
+
+          # Export path strictly for downstream steps
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_FILE" >> $GITHUB_ENV
+          echo "ANDROID_KEYSTORE_DIR=$KEYSTORE_DIR" >> $GITHUB_ENV
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Build and Sign Release APK & AAB
+        run: |
+          ./gradlew assembleRelease bundleRelease --no-daemon --stacktrace
+        working-directory: ./android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Strictly Validate Release Signatures
+        run: |
+          echo "=== Strictly Validating Release Signatures ==="
+
+          # Locate apksigner in Android SDK build-tools
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name "apksigner" 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$APKSIGNER" ] || [ ! -x "$APKSIGNER" ]; then
+            echo "::error::apksigner tool not found in Android SDK ($ANDROID_HOME/build-tools)."
+            exit 1
+          fi
+
+          APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
+          AAB_PATH="android/app/build/outputs/bundle/release/app-release.aab"
+
+          # 1. Enforce signed APK existence
+          if [ ! -f "$APK_PATH" ]; then
+            echo "::error::Signed release APK was not generated at $APK_PATH"
+            exit 1
+          fi
+
+          # 2. Verify APK signature with apksigner (must return 0; failures are NOT suppressed)
+          echo "Verifying APK signature ($APK_PATH)..."
+          "$APKSIGNER" verify --verbose "$APK_PATH"
+          echo " APK signature strictly verified (v2/v3 scheme)."
+
+          # 3. Enforce signed AAB existence
+          if [ ! -f "$AAB_PATH" ]; then
+            echo "::error::Signed release AAB was not generated at $AAB_PATH"
+            exit 1
+          fi
+
+          # 4. Verify AAB signature with jarsigner (must return 0; failures are NOT suppressed)
+          echo "Verifying AAB signature ($AAB_PATH)..."
+          jarsigner -verify -strict "$AAB_PATH"
+          echo " AAB signature strictly verified."
+
+      - name: Memory Keystore Secure Erasure & Cleanup
+        if: always()
+        run: |
+          echo "=== Performing Secure Keystore Erasure ==="
+          if [ -n "$ANDROID_KEYSTORE_PATH" ] && [ -f "$ANDROID_KEYSTORE_PATH" ]; then
+            # Overwrite memory buffer with random bytes, then zero out and unlink
+            dd if=/dev/urandom of="$ANDROID_KEYSTORE_PATH" bs=1k count=10 conv=notrunc 2>/dev/null || true
+            shred -u -z -n 3 "$ANDROID_KEYSTORE_PATH" 2>/dev/null || rm -f "$ANDROID_KEYSTORE_PATH"
+          fi
+          if [ -n "$ANDROID_KEYSTORE_DIR" ] && [ -d "$ANDROID_KEYSTORE_DIR" ]; then
+            rm -rf "$ANDROID_KEYSTORE_DIR"
+          fi
+          echo " Keystore securely erased from volatile memory."
+
+      - name: Prepare Signed Release Artifacts
         run: |
           mkdir -p release-binaries
+          VERSION_TAG="${{ github.ref_name }}"
+          [ -z "$VERSION_TAG" ] && VERSION_TAG="latest"
+
+          # Copy verified signed binaries
+          cp android/app/build/outputs/apk/release/app-release.apk "release-binaries/AzokleAuth-${VERSION_TAG}-release.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab "release-binaries/AzokleAuth-${VERSION_TAG}-release.aab"
+
+          # Build debug APK for testing/development attachment
+          ./gradlew assembleDebug --no-daemon --stacktrace
           if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            cp android/app/build/outputs/apk/debug/app-debug.apk release-binaries/AzokleAuth-${{ github.ref_name }}-debug.apk
+            cp android/app/build/outputs/apk/debug/app-debug.apk "release-binaries/AzokleAuth-${VERSION_TAG}-debug.apk"
           fi
-          if [ -d android/app/build/outputs/apk/release ]; then
-            cp android/app/build/outputs/apk/release/*.apk release-binaries/ 2>/dev/null || true
-          fi
+
+          # Compute cryptographic SHA-256 checksums
+          cd release-binaries
+          sha256sum AzokleAuth* > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+        working-directory: .
+
+      - name: Upload Signed Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzokleAuth-Signed-Release-Binaries
+          path: release-binaries/
+          retention-days: 14
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build-and-sign
+    runs-on: ubuntu-latest
+    # Publish only when triggered on valid release tags or authorized manual dispatch with explicit flag
+    if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/tags/[0-9]') || (github.event_name == 'workflow_dispatch' && inputs.publish_release == true)
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Signed Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: AzokleAuth-Signed-Release-Binaries
+          path: release-binaries/
 
       - name: Create GitHub Release & Attach Binaries
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
