@@ -12,7 +12,9 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
+import androidx.core.os.LocaleListCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -44,6 +46,17 @@ public abstract class AzokleAuthApplicationBase extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Initialize user-selected locale across the application
+        Preferences prefs = new Preferences(this);
+        String lang = prefs.getLanguage();
+        if (!"system".equals(lang)) {
+            String tag = prefs.getLanguageTag();
+            if (!tag.isEmpty()) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag));
+            }
+        }
+
         _vaultManager = EarlyEntryPoints.get(this, EntryPoint.class).getVaultManager();
 
         VaultLockReceiver lockReceiver = new VaultLockReceiver();

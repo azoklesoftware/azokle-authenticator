@@ -1,0 +1,3 @@
+- Complete multi-language localization fix with seamless real-time language switching
+- Performance and stability improvements
+- Security enhancements for encrypted token storage

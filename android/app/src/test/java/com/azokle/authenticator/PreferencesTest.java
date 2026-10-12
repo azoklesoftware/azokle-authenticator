@@ -14,11 +14,38 @@ import androidx.test.core.app.ApplicationProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.Date;
+import java.util.Locale;
+
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = 34)
 public class PreferencesTest {
+    @Test
+    public void testLanguageAndLocaleResolution() {
+        Context context = ApplicationProvider.getApplicationContext();
+        Preferences prefs = new Preferences(context);
+
+        // Test default
+        prefs.setLanguage("system");
+        assertEquals("system", prefs.getLanguage());
+        assertEquals("", prefs.getLanguageTag());
+        assertNotNull(prefs.getLocale());
+
+        // Test languages
+        String[] testLangs = {"de", "fr", "es", "zh_CN", "zh_TW", "pt_BR", "ja", "ru", "ar", "hi", "it", "nl"};
+        for (String lang : testLangs) {
+            prefs.setLanguage(lang);
+            assertEquals(lang, prefs.getLanguage());
+            assertFalse(prefs.getLanguageTag().isEmpty());
+            Locale locale = prefs.getLocale();
+            assertNotNull(locale);
+            assertFalse(locale.getLanguage().isEmpty());
+        }
+    }
     @Test
     public void testIsPasswordReminderNeeded() {
         long currTime = new Date().getTime();

@@ -361,6 +361,20 @@ public class Preferences {
         _prefs.edit().putString("pref_lang", lang).apply();
     }
 
+    public String getLanguageTag() {
+        String lang = getLanguage();
+        if ("system".equals(lang)) {
+            return "";
+        }
+        if ("in".equals(lang)) {
+            return "id";
+        }
+        if ("iw".equals(lang)) {
+            return "he";
+        }
+        return lang.replace('_', '-');
+    }
+
     public Locale getLocale() {
         String lang = getLanguage();
 
@@ -370,6 +384,11 @@ public class Preferences {
             } else {
                 return Resources.getSystem().getConfiguration().locale;
             }
+        }
+
+        String tag = getLanguageTag();
+        if (!tag.isEmpty()) {
+            return Locale.forLanguageTag(tag);
         }
 
         String[] parts = lang.split("_");

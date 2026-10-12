@@ -2,10 +2,13 @@ package com.azokle.authenticator.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -56,6 +59,30 @@ public abstract class AzokleAuthActivity extends AppCompatActivity implements Va
     protected IconPackManager _iconPackManager;
 
     private ActionModeStatusGuardHack _statusGuardHack;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        Context appContext = newBase.getApplicationContext() != null ? newBase.getApplicationContext() : newBase;
+        Preferences prefs = new Preferences(appContext);
+        String lang = prefs.getLanguage();
+        if (!"system".equals(lang)) {
+            Locale locale = prefs.getLocale();
+            Locale.setDefault(locale);
+            Configuration config = new Configuration(newBase.getResources().getConfiguration());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                config.setLocale(locale);
+                LocaleList localeList = new LocaleList(locale);
+                LocaleList.setDefault(localeList);
+                config.setLocales(localeList);
+                super.attachBaseContext(newBase.createConfigurationContext(config));
+                return;
+            } else {
+                config.locale = locale;
+                newBase.getResources().updateConfiguration(config, newBase.getResources().getDisplayMetrics());
+            }
+        }
+        super.attachBaseContext(newBase);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,8 +147,15 @@ public abstract class AzokleAuthActivity extends AppCompatActivity implements Va
     protected void setLocale(Locale locale) {
         Locale.setDefault(locale);
 
-        Configuration config = new Configuration();
-        config.locale = locale;
+        Configuration config = getResources().getConfiguration();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            config.setLocale(locale);
+            LocaleList localeList = new LocaleList(locale);
+            LocaleList.setDefault(localeList);
+            config.setLocales(localeList);
+        } else {
+            config.locale = locale;
+        }
 
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
     }

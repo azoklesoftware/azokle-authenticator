@@ -96,7 +96,14 @@ cd android
 
 # Build debug APK
 ./gradlew assembleDebug
+
+# Build release APK
+./gradlew assembleRelease
 ```
+
+### 3. F-Droid & Distribution
+- **F-Droid Recipe:** [`fdroid/com.azokle.authenticator.yml`](fdroid/com.azokle.authenticator.yml)
+- **F-Droid Publishing Guide:** See [`docs/FDROID_PUBLISHING_GUIDE.md`](docs/FDROID_PUBLISHING_GUIDE.md) for official F-Droid catalog inclusion and release instructions.
 
 ---
 

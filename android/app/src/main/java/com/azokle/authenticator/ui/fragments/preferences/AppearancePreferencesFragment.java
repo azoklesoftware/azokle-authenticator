@@ -5,6 +5,8 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
 import androidx.preference.Preference;
 
 import com.azokle.authenticator.AccountNamePosition;
@@ -88,10 +90,17 @@ public class AppearancePreferencesFragment extends PreferencesFragment {
                         .setTitle(R.string.pref_lang_title)
                         .setSingleChoiceItems(langNames, curLangIndex, (dialog, which) -> {
                             int newLangIndex = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                            _prefs.setLanguage(langs[newLangIndex]);
+                            String selectedLang = langs[newLangIndex];
+                            _prefs.setLanguage(selectedLang);
                             langPreference.setSummary(langNames[newLangIndex]);
 
                             dialog.dismiss();
+
+                            String tag = _prefs.getLanguageTag();
+                            LocaleListCompat appLocales = tag.isEmpty()
+                                    ? LocaleListCompat.getEmptyLocaleList()
+                                    : LocaleListCompat.forLanguageTags(tag);
+                            AppCompatDelegate.setApplicationLocales(appLocales);
 
                             requireActivity().recreate();
                         })

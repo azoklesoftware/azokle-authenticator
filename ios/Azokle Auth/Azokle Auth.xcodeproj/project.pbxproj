@@ -253,6 +253,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Azokle Auth requires camera access to scan 2FA authentication QR codes.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Azokle Auth uses Face ID to securely unlock your encrypted vault.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Azokle Auth accesses your photo library to select custom account icons.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +287,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Azokle Auth requires camera access to scan 2FA authentication QR codes.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Azokle Auth uses Face ID to securely unlock your encrypted vault.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Azokle Auth accesses your photo library to select custom account icons.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
