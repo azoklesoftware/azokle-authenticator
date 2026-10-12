@@ -2,11 +2,11 @@ name: F-Droid & Android CI/CD
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     tags:
       - 'v*'
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -38,6 +38,16 @@ jobs:
       - name: Run Android Lint Check
         run: ./gradlew lint --no-daemon --stacktrace || echo "Lint check complete"
         working-directory: ./android
+
+      - name: Verify F-Droid Recipe & Fastlane Metadata
+        run: |
+          echo "=== Verifying F-Droid Metadata & Recipe ==="
+          test -f fdroid/com.azokle.authenticator.yml || test -f .fdroid.yml
+          test -f fastlane/metadata/android/en-US/title.txt
+          test -f fastlane/metadata/android/en-US/short_description.txt
+          test -f fastlane/metadata/android/en-US/full_description.txt
+          test -f fastlane/metadata/android/en-US/images/icon.png
+          echo " F-Droid Recipe & Fastlane Metadata verified!"
 
   build-debug:
     name: Build Debug APK
@@ -95,8 +105,14 @@ jobs:
         working-directory: ./android
 
       - name: Build F-Droid Release APK
-        run: ./gradlew assembleRelease --no-daemon --stacktrace || echo "Release build step complete"
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
         working-directory: ./android
+
+      - name: Prepare Release APK Artifacts
+        run: |
+          if [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/AzokleAuth-release-unsigned.apk
+          fi
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
@@ -104,6 +120,13 @@ jobs:
           name: AzokleAuth-F-Droid-Release
           path: android/app/build/outputs/apk/release/
           if-no-files-found: ignore
+
+      - name: F-Droid Publishing Notice
+        run: |
+          echo "### ℹ️ F-Droid Publishing Status" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow compiles and verifies the F-Droid open-source build." >> $GITHUB_STEP_SUMMARY
+          echo "To appear in the official F-Droid catalog, submit a Merge Request with \`fdroid/com.azokle.authenticator.yml\` to [fdroiddata](https://gitlab.com/fdroid/fdroiddata)." >> $GITHUB_STEP_SUMMARY
+          echo "See [FDROID_PUBLISHING_GUIDE.md](docs/FDROID_PUBLISHING_GUIDE.md) for full instructions." >> $GITHUB_STEP_SUMMARY
 
   github-release:
     name: Create GitHub Release

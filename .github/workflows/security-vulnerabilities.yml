@@ -1,0 +1,211 @@
+name: Android Security & Vulnerability Analysis
+
+on:
+  push:
+    branches: [ main, development ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/security-vulnerabilities.yml'
+      - '.github/dependabot.yml'
+  pull_request:
+    branches: [ main, master, development ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/security-vulnerabilities.yml'
+      - '.github/dependabot.yml'
+  schedule:
+    # Run weekly every Monday at 04:00 UTC
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  # =========================================================================
+  # 1. Dependency Graph Submission for GitHub Dependabot & Security Advisories
+  # =========================================================================
+  dependency-submission:
+    name: Submit Android Dependency Graph
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to submit dependency snapshot to GitHub Dependency Graph
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+          cache-dependency-path: 'android/*.gradle*'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./android
+
+      - name: Submit Android Dependency Graph
+        uses: gradle/actions/dependency-submission@v4
+        with:
+          build-root-directory: ./android
+
+  # =========================================================================
+  # 2. Trivy SCA Scanner (CVE Vulnerabilities, Misconfigurations & Dependencies)
+  # =========================================================================
+  trivy-sca:
+    name: Trivy Vulnerability & Misconfig Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Scanner on Android
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: './android'
+          format: 'sarif'
+          output: 'trivy-android-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln,misconfig,secret'
+          exit-code: '0'
+
+      - name: Upload Trivy SARIF Report to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-android-results.sarif'
+          category: 'trivy-android-sca'
+
+      - name: Generate Trivy Table Summary
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: './android'
+          format: 'table'
+          output: 'trivy-summary.txt'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln,misconfig'
+          exit-code: '0'
+
+      - name: Output Summary to Job Step
+        if: always()
+        run: |
+          if [ -f trivy-summary.txt ]; then
+            echo "### 🛡️ Trivy Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            cat trivy-summary.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # =========================================================================
+  # 3. Android Lint Security Analysis
+  # =========================================================================
+  android-lint:
+    name: Android Lint Security Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+          cache-dependency-path: 'android/*.gradle*'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./android
+
+      - name: Run Android Lint (Debug)
+        run: ./gradlew :app:lintDebug --no-daemon --continue --stacktrace
+        working-directory: ./android
+
+      - name: Upload Android Lint Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-lint-security-reports
+          path: |
+            android/app/build/reports/lint-results-debug.html
+            android/app/build/reports/lint-results-debug.xml
+            android/app/build/reports/lint-results-debug.txt
+          if-no-files-found: ignore
+
+  # =========================================================================
+  # 4. Semgrep SAST Analysis (Mobile Security & OWASP Top 10)
+  # =========================================================================
+  semgrep-sast:
+    name: Semgrep Mobile SAST Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep SAST on Android Codebase
+        run: |
+          semgrep scan \
+            --config "p/security-audit" \
+            --config "p/owasp-top-10" \
+            --config "p/cwe-top-25" \
+            --sarif \
+            --output semgrep-android-results.sarif \
+            android/ || true
+
+      - name: Upload Semgrep SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('semgrep-android-results.sarif') != ''
+        with:
+          sarif_file: 'semgrep-android-results.sarif'
+          category: 'semgrep-android-sast'
+
+  # =========================================================================
+  # 5. Secret & Credential Leak Detection (Gitleaks)
+  # =========================================================================
+  secret-scan:
+    name: Secret & Credential Leak Detection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks Secret Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_SARIF: true
+          GITLEAKS_NOTIFY_USER_ACTION: false
+        continue-on-error: true
+
+      - name: Upload Gitleaks SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('results.sarif') != ''
+        with:
+          sarif_file: 'results.sarif'
+          category: 'gitleaks-secret-scan'

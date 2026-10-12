@@ -2,9 +2,9 @@ name: CodeQL Security Analysis
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "development" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "development" ]
   schedule:
     - cron: '25 16 * * 2'
   workflow_dispatch:
